@@ -1,16 +1,17 @@
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.lang import Builder
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.popup import Popup
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, ObjectProperty
 from kivy.core.window import Window
 from kivy.config import Config
 import certifi
 from datetime import *
 from kivy.app import App
 from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
 
 ca = certifi.where()
 
@@ -24,8 +25,8 @@ from pickle import  dump, load
 
 client = pymongo.MongoClient("mongodb+srv://user1:honeycake123@cluster0.zd1jh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", tlsCAFile=ca)
 db = client.get_database("database_main")
-rec1 = db.doctor
-rec2 = db.parent
+rec1 = db.parent
+rec2 = db.doctor
 childcol = db["child"]
 vaxcol = db["vaccine"]
 
@@ -87,7 +88,6 @@ def generate_unique_id(case):
     # for i in range(6):
     #     id += choice(li)
 
-    
 
 class Pop(Popup):
 
@@ -107,7 +107,7 @@ class Pop(Popup):
         self.dismiss()
 
 def email_process(case, email, passwd, logged_in, user_type=None):
-    global main_mail, main_user_type, sm, pop_text
+    global main_mail, main_user_type, sm, pop_text, plob
     print(case)
     print(email)
     print(passwd)
@@ -146,6 +146,8 @@ def email_process(case, email, passwd, logged_in, user_type=None):
                     dump(email, file)
                     dump(id, file)
             if main_user_type == 0:
+                plob = ParentLobby(name="plobby")
+                sm.add_widget(plob)
                 sm.current = "plobby"
             elif main_user_type == 1:
                 sm.current = "lobby"
@@ -173,14 +175,16 @@ def email_process(case, email, passwd, logged_in, user_type=None):
             main_user_type = user_type
             id = generate_unique_id(user_type)
             if(user_type == 0):
-                rec2.insert_one({"id": id,"email": email, "password": passwd, "children": []})
+                rec1.insert_one({"id": id,"email": email, "password": passwd, "children": []})
             else:
-                rec1.insert_one({"id": id, "email": email, "password": passwd, "patient": []})
+                rec2.insert_one({"id": id, "email": email, "password": passwd, "patient": []})
             if(logged_in):
                 with open("logged_in", "wb") as file:
                     dump(email, file)
                     dump(id, file)
             if main_user_type == 0:
+                plob = ParentLobby(name="plobby")
+                sm.add_widget(plob)
                 sm.current = "plobby"
             else:
                 sm.current = "lobby"
@@ -244,18 +248,38 @@ class Lobby(Screen):
             with open("logged_in", "wb"):
                 pass
             sm.current = "one"
+            sm.remove_widget(plob)
 
 class ParentLobby(Screen):
+    view1 = ObjectProperty(None)
+
     def menu_clicked(self, value):
-        global sm
+        global sm, plob
         if(value == "Sign Out"):
             self.ids.menu.text = "Home"
             with open("logged_in", "wb"):
                 pass
             sm.current = "one"
+            sm.remove_widget(plob)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+        layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        layout.bind(minimum_height=layout.setter("height"))
+        
+        for child in childcol.find({"pmail": main_mail}):
+            btn = Button(text= child["name"],size_hint = (1, None), height = 50, background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1) )
+            layout.add_widget(btn)
+
+        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
+        scrollview.add_widget(layout)
+
+        self.view1.add_widget(scrollview)
 
 class AddChildScreen(Screen):
     def addChild(self, name, dob, docid):
+        global plob
         try:
             dateOfBirth = datetime(int(dob[6:]), int(dob[3:5]), int(dob[:2]))
         except:
@@ -276,8 +300,9 @@ class AddChildScreen(Screen):
         self.ids.dobin.text = ""
         self.ids.namein.text = ""
         self.ids.docin.text = ""
-
-
+        sm.remove_widget(plob)
+        plob = ParentLobby(name="plobby")
+        sm.add_widget(plob)
             
 
 
@@ -295,13 +320,12 @@ Builder.load_file('Illimmunate.kv')
 
 class Main(App):
     def build(self):
-        global sm, main_mail, main_user_type
+        global sm, main_mail, main_user_type, plob
         sm = WindowManager(transition=NoTransition())
         sm.add_widget(PageOne(name="one"))
         sm.add_widget(Login(name="login"))
         sm.add_widget(SignUp(name="signup"))
         sm.add_widget(Lobby(name="lobby"))  
-        sm.add_widget(ParentLobby(name="plobby"))
         sm.add_widget(AddChildScreen(name="addchild"))   
         Window.clearcolor = (1, 1, 1, 1)
         Window.size = (800, 750)
@@ -314,6 +338,8 @@ class Main(App):
             main_mail = x
             if(y[0] == 'P'):
                 main_user_type = 0
+                plob = ParentLobby(name="plobby")
+                sm.add_widget(plob)
                 sm.current = "plobby"
             else:
                 main_user_type = 1

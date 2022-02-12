@@ -259,6 +259,8 @@
     view1: view1
     BoxLayout:
         orientation: "horizontal"
+        spacing: "50dp"
+        padding: "30dp"
 
         BoxLayout:
             orientaion: "vertical"
@@ -266,6 +268,8 @@
             Button:
                 text: "Add child details"
                 on_release: root.manager.current = "addchild"
+                size_hint: 1, 0.1
+                pos_hint: {"top": 1}
 
             ScrollView:
                 id: view1
@@ -283,6 +287,39 @@
                 background_normal: ''
                 background_color: (255.0/255.0, 240.0/255.0, 0, 1)
                 on_text: root.menu_clicked(menu.text)
+
+<AddChildScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        GridLayout:
+            cols: 2
+
+            Label:
+                text: "Enter name"
+
+            TextInput:
+                id: namein
+
+            Label:
+                text: "Enter DOB(dd/mm/yyyy)"
+
+            TextInput:
+                id: dobin
+
+            Label:
+                text: "Enter doctor ID"
+
+            TextInput:
+                id: docin
+
+            Button:
+                text: "Done"
+                on_release: root.addChild(namein.text, dobin.text, docin.text)
+
+            Button:
+                text: "Back"
+                on_release: root.manager.current = "plobby"
 
 <ForgotPswd>:
     name: "fpasswd"
