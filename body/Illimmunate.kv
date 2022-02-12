@@ -1,43 +1,288 @@
 #:kivy 2.0.0
 
-<ParentScreen>:
+<PageOne>:
+    name: "one"
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'injection2.png'
+
     BoxLayout:
         orientation: "vertical"
+        padding: "250dp"
+        spacing: "100dp"
+        Button:
+            text: "Login"
+            font_size: "25dp"
+            background_normal: ''
+            background_color: (64.0/255.0, 0.0/255.0, 128.0/255.0, 1)
+            on_release:
+                app.root.current = "login"
+                root.sign_in_up(0)
 
         Button:
-            text: "Add child"
-            size_hint: 0.8, 0.1
-            on_release: root.manager.current = "addchild"
+            text: "SignUp"
+            font_size: "25dp"
+            background_normal: ''
+            background_color: (64.0/255.0, 0.0/255.0, 128.0/255.0, 1)
+            on_release:
+                app.root.current = "signup"
+                root.sign_in_up(1)
 
-<AddChildScreen>:
+<Login>:
+    name: "login"
     BoxLayout:
+        padding: "50dp"
         orientation: "vertical"
 
-        GridLayout:
-            cols: 2
+        Label:
+            text: "Login"
+            color: 0, 0, 0, 1
+            font_size: "25dp"
+
+        BoxLayout:
+            orientation: "horizontal"
 
             Label:
-                text: "Enter name"
+                text: "email"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
 
             TextInput:
-                id: namein
+                id: email
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
+
+
+        BoxLayout:
+            orientation: "horizontal"
 
             Label:
-                text: "Enter DOB(dd/mm/yyyy)"
+                text: "Password"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
 
             TextInput:
-                id: dobin
+                id: passwd
+                password: True
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
 
+
+
+        BoxLayout:
             Label:
-                text: "Enter doctor ID"
+                text: "Remember Me"
+                color: 0, 0, 0, 1
+                font_size: "17dp"
 
-            TextInput:
-                id: docin
+            CheckBox:
+                id: logged_in
+                color: 0, 0, 0, 1
+
+#            Button:
+#                text: "Forgot Password ?"
+#                font_size: "17dp"
+#                on_press:
+#                    app.root.current = "fpasswd"
+
+
+        BoxLayout:
+            padding: "10dp"
+            spacing: "20dp"
+            orientation: "horizontal"
 
             Button:
-                text: "Done"
-                on_release: root.addChild(namein.text, dobin.text, docin.text)
+                size_hint:3, 1
+                text: "Submit"
+                on_press:
+                    root.get_cred(email.text, passwd.text, logged_in.active)
 
             Button:
+                size_hint: 1, 1
                 text: "Back"
-                on_release: root.manager.current = "parent"
+                on_press:
+                    app.root.current = "one"
+
+<SignUp>:
+    name: "signup"
+    BoxLayout:
+        padding: "50dp"
+        orientation: "vertical"
+
+        Label:
+            text: "Login"
+            color: 0, 0, 0, 1
+            font_size: "25dp"
+
+        BoxLayout:
+            orientation: "horizontal"
+
+            Label:
+                text: "email"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
+
+            TextInput:
+                id: email
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
+
+
+        BoxLayout:
+            orientation: "horizontal"
+
+            Label:
+                text: "Password"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
+
+            TextInput:
+                id: passwd
+                password: True
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
+
+
+        BoxLayout:
+
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "Parent"
+                    color: 0,0,0,1
+                    font_size: "25dp"
+
+                CheckBox:
+                    group: "user_type"
+                    color: 0, 0, 0, 1
+                    on_active: root.check_box_act(self, self.active, 0)
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "Doctor"
+                    color: 0,0,0,1
+                    font_size: "25dp"
+                CheckBox:
+                    group: "user_type"
+                    color: 0, 0, 0, 1
+                    on_active: root.check_box_act(self, self.active, 1)
+
+
+
+        BoxLayout:
+            Label:
+                text: "Remember Me"
+                color: 0, 0, 0, 1
+                font_size: "17dp"
+
+            CheckBox:
+                id: logged_in
+                color: 0, 0, 0, 1
+
+        BoxLayout:
+            padding: "10dp"
+            spacing: "20dp"
+            orientation: "horizontal"
+
+            Button:
+                size_hint:3, 1
+                text: "Submit"
+                on_press:
+                    root.get_cred(email.text, passwd.text, logged_in.active)
+
+            Button:
+                size_hint: 1, 1
+                text: "Back"
+                on_press:
+                    app.root.current = "one"
+
+<Lobby>:
+    name: "lobby"
+    view1: view1
+    view2: view2
+    spacing: "50dp"
+    BoxLayout:
+        spacing: "50dp"
+        padding: "30dp"
+        orientation: "horizontal"
+
+        BoxLayout:
+            size_hint: 0.4, 1
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    size_hint : 1, 0.5
+                    pos_hint: {"center_y": 0}
+                    text: "New Patient\n Request"
+                    color: 0, 0, 0, 1
+                    font_size: "25dp"
+
+                ScrollView:
+                    id : view1
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint: 1, 1
+            Label:
+
+                text: "Dashboard"
+                font_size: "25"
+                color: 0, 0, 0, 1
+
+            ScrollView:
+                id: view2
+                do_scroll_x: False
+                do_scroll_y: True
+        BoxLayout:
+            pos_hint: {"y": 0.9}
+            size_hint: 0.24, 0.1
+            Spinner:
+                color: 0, 0, 0, 1
+                id: menu
+                text: "Home"
+                values: ["Home", "Sign Out", "Edit Account"]
+                background_normal: ''
+                background_color: (255.0/255.0, 240.0/255.0, 0, 1)
+                on_text: root.menu_clicked(menu.text)
+
+<ParentLobby>:
+    name: "plobby"
+    view1: view1
+    BoxLayout:
+        orientation: "horizontal"
+
+        BoxLayout:
+            orientaion: "vertical"
+
+            Button:
+                text: "Add child details"
+                on_release: root.manager.current = "addchild"
+
+            ScrollView:
+                id: view1
+                do_scroll_x: False
+                do_scroll_y: True
+        
+        BoxLayout:
+            pos_hint: {"y": 0.9}
+            size_hint: 0.24, 0.1
+            Spinner:
+                color: 0, 0, 0, 1
+                id: menu
+                text: "Home"
+                values: ["Home", "Sign Out", "Edit Account"]
+                background_normal: ''
+                background_color: (255.0/255.0, 240.0/255.0, 0, 1)
+                on_text: root.menu_clicked(menu.text)
+
+<ForgotPswd>:
+    name: "fpasswd"
