@@ -1,0 +1,43 @@
+#:kivy 2.0.0
+
+<ParentScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        Button:
+            text: "Add child"
+            size_hint: 0.8, 0.1
+            on_release: root.manager.current = "addchild"
+
+<AddChildScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        GridLayout:
+            cols: 2
+
+            Label:
+                text: "Enter name"
+
+            TextInput:
+                id: namein
+
+            Label:
+                text: "Enter DOB(dd/mm/yyyy)"
+
+            TextInput:
+                id: dobin
+
+            Label:
+                text: "Enter doctor ID"
+
+            TextInput:
+                id: docin
+
+            Button:
+                text: "Done"
+                on_release: root.addChild(namein.text, dobin.text, docin.text)
+
+            Button:
+                text: "Back"
+                on_release: root.manager.current = "parent"
