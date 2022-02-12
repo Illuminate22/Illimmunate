@@ -262,6 +262,13 @@ class ParentLobby(Screen):
             sm.current = "one"
             sm.remove_widget(plob)
 
+    def child_button_clicked(name):
+        global sm
+        childwin = ChildScreen(name= "child")
+        childwin.ids.namel.text = name + "'s vaccine\n chart"
+        sm.add_widget(childwin)
+        sm.current = "child"
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
@@ -269,7 +276,8 @@ class ParentLobby(Screen):
         layout.bind(minimum_height=layout.setter("height"))
         
         for child in childcol.find({"pmail": main_mail}):
-            btn = Button(text= child["name"],size_hint = (1, None), height = 50, background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1) )
+            btn = Button(text= child["name"],size_hint = (1, None), height = 50, background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1))
+            btn.bind(on_release = ParentLobby.child_button_clicked(btn.text))
             layout.add_widget(btn)
 
         scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
@@ -304,7 +312,8 @@ class AddChildScreen(Screen):
         plob = ParentLobby(name="plobby")
         sm.add_widget(plob)
             
-
+class ChildScreen(Screen):
+    pass
 
 # class ForgotPswd(Screen):
 #     pass

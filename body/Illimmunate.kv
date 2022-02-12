@@ -321,5 +321,28 @@
                 text: "Back"
                 on_release: root.manager.current = "plobby"
 
-<ForgotPswd>:
-    name: "fpasswd"
+<ChildScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.2
+
+            Label:
+                id: namel
+
+            ToggleButton:
+                group: "menu"
+                text: "Vaccines due\n now"
+                state: "down"
+            
+            ToggleButton:
+                group: "menu"
+                text: "Vaccines \n taken"
+
+            ToggleButton:
+                group: "menu"
+                text: "Vaccines to\n be taken"
+
+
