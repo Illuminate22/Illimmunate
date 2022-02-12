@@ -398,29 +398,11 @@ class AddChildScreen(Screen):
 
 class ChildScreen(Screen):
     view1 = ObjectProperty(None)
+    view2 = ObjectProperty(None)
+    view3 = ObjectProperty(None)
 
     def due_button(self):
-        global lay1, ch1
-        lay1 = GridLayout(cols=3, spacing=10, size_hint_y=None)
-        lay1.bind(minimum_height=lay1.setter("height"))
-
-        dueVaccines = ch1["dueVaccines"]
-
-        for vaccine in dueVaccines:
-            lab = Label(text=vaxcol.find_one({"vid": vaccine})["name"], size_hint=(1, None), height=50,
-                        background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1))
-            btn1 = Button(text="Taken", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                          color=(1, 1, 1, 1))
-            btn2 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                          color=(1, 1, 1, 1))
-            lay1.add_widget(lab)
-            lay1.add_widget(btn1)
-            lay1.add_widget(btn2)
-
-        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
-        scrollview.add_widget(lay1)
-
-        self.view1.add_widget(scrollview)
+        pass
 
     def over_button(self):
         pass
@@ -430,6 +412,66 @@ class ChildScreen(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        global ch1
+        
+        dueVaccines = ch1["dueVaccines"]
+        overVaccines = ch1["overVaccines"]
+        yetVaccines = ch1["yetVaccines"]
+        
+        lay1 = GridLayout(cols=3, spacing=10, size_hint_y=None)
+        lay1.bind(minimum_height=lay1.setter("height"))
+
+        
+        for vaccine in dueVaccines:
+            vaxname = vaxcol.find_one({"vid": vaccine})["name"]
+            
+            lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1), color=(1, 1, 1, 1))
+            btn1 = Button(text="Taken", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),color=(1, 1, 1, 1))
+            btn2 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                          color=(1, 1, 1, 1))
+            lay1.add_widget(lab)
+            lay1.add_widget(btn1)
+            lay1.add_widget(btn2)
+        
+        
+
+        self.view1.add_widget(lay1)
+
+        lay3 = GridLayout(cols=2, spacing=10, size_hint_y=None)
+        lay3.bind(minimum_height=lay1.setter("height"))
+
+
+        for vaccine in yetVaccines:
+            vaxname = vaxcol.find_one({"vid": vaccine})["name"]
+            
+            lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1), color=(1, 1, 1, 1))
+            btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                          color=(1, 1, 1, 1))
+            lay3.add_widget(lab)
+            
+            lay3.add_widget(btn1)
+        
+        
+
+        self.view3.add_widget(lay3)
+
+        lay2 = GridLayout(cols=2, spacing=10, size_hint_y=None)
+        lay2.bind(minimum_height=lay1.setter("height"))
+
+        for vaccine in overVaccines:
+            vaxname = vaxcol.find_one({"vid": vaccine})["name"]
+            
+            lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1), color=(1, 1, 1, 1))
+            btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                          color=(1, 1, 1, 1))
+            lay2.add_widget(lab)
+            
+            lay2.add_widget(btn1)
+
+        self.view2.add_widget(lay2)
+
+    
+    
 
 
 # class ForgotPswd(Screen):

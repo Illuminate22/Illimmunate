@@ -323,36 +323,49 @@
 
 <ChildScreen>:
     view1: view1
+    view2: view2
+    view3: view3
     BoxLayout:
         orientation: "vertical"
-
         BoxLayout:
             orientation: "horizontal"
-            size_hint_y: 0.2
-
+            size_hint: 1, 0.05
             Label:
                 id: namel
+                color: 0, 0, 0, 1
+            Button:
+                text: 'Doctor details'
 
-            ToggleButton:
-                group: "menu"
-                text: "Vaccines due\n now"
-                state: "down"
-                on_state: root.due_button
+        TabbedPanel:
+            do_default_tab: False
 
-            ToggleButton:
-                group: "menu"
-                text: "Vaccines \n taken"
-                on_state: root.over_button
+            TabbedPanelItem:
+                text: "Vaccines \ndue now"
 
-            ToggleButton:
-                group: "menu"
-                text: "Vaccines to\n be taken"
-                on_state: root.yet_button
+                BoxLayout:
+                
+                    ScrollView:
+                        id : view1
+                        do_scroll_x: False
+                        do_scroll_y: True
 
-        ScrollView:
-            id : view1
-            do_scroll_x: False
-            do_scroll_y: True
+            TabbedPanelItem:
+                text: "Vaccines\n taken"
+
+                ScrollView:
+                    id : view2
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+            TabbedPanelItem:
+                text: "Vaccines to be\n taken"
+
+                ScrollView:
+                    id : view3
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+
 
         Button:
             text: "Back"
