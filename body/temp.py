@@ -10,8 +10,8 @@ vaxcol = db["vaccine"]
 
 class Vaccines:
     vaxlist = []
-    def __init__(self, name, date_start, date_end, info):
-        dic = {"name" :name,"date_start" : date_start.days,"date_end" : date_end.days,"info" : info}
+    def __init__(self, vid, name, date_start, date_end, info):
+        dic = {"vid": vid,"name" :name,"date_start" : date_start.days,"date_end" : date_end.days,"info" : info}
         Vaccines.vaxlist.append(dic)
         self.dic = dic
     def __str__(self):
@@ -31,28 +31,28 @@ class Vaccines:
         for vaccine in Vaccines.vaxlist:
             vaxcol.insert_one(vaccine)
 
-opv0 = Vaccines("OPV-0", timedelta(days = 0), timedelta(days = 15), None)
-opv1 = Vaccines("OPV-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
-opv2 = Vaccines("OPV-2", timedelta(weeks = 9), timedelta(weeks = 10), None)
-opv3 = Vaccines("OPV-3", timedelta(weeks = 13), timedelta(weeks = 14), None)
-ptv1 = Vaccines("Pentavalent-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
-ptv2 = Vaccines("Pentavalent-2", timedelta(weeks = 9), timedelta(weeks = 10), None)
-ptv3 = Vaccines("Pentavalent-3", timedelta(weeks = 13), timedelta(weeks = 14), None)
-rtv1 = Vaccines("Rotavirus-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
-rtv2 = Vaccines("Rotavirus-2", timedelta(weeks = 9), timedelta(weeks = 10), None)
-rtv3 = Vaccines("Rotavirus-3", timedelta(weeks = 13), timedelta(weeks = 14), None)
-ipv1 = Vaccines("IPV-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
-ipv2 = Vaccines("IPV-2", timedelta(weeks = 13), timedelta(weeks = 14), None)
-mr1 = Vaccines("Measles-Rubella-1", timedelta(weeks = 4 * 9), timedelta(weeks = 4 * 12), None)
-je1 = Vaccines("JE-1", timedelta(weeks = 4 * 9), timedelta(weeks = 4 * 12), None)
-va1 = Vaccines("Vitamin A-1", timedelta(weeks = 4 * 9), timedelta(weeks = 4 * 12), None)
-dpt1 = Vaccines("DPT booster-1", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
-mr2 = Vaccines("Measles-Rubella-2", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
-opvb = Vaccines("OPV Booster", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
-je2 = Vaccines("JE-2", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
-va2 = Vaccines("Vitamin A-2", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 18), None)
-va3 = Vaccines("Vitamin A-3", timedelta(weeks = 4 * 22), timedelta(weeks = 4 * 24), None)
-dptb = Vaccines("DPT Booster-2", timedelta(weeks = 52 * 5), timedelta(weeks = 52 * 6), None)
-tt = Vaccines("TT", timedelta(weeks = 52 * 10), timedelta(weeks = 52 * 16), None)
+opv0 = Vaccines("opv0", "OPV-0", timedelta(days = 0), timedelta(days = 15), None)
+opv1 = Vaccines("opv1", "OPV-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
+opv2 = Vaccines("opv2", "OPV-2", timedelta(weeks = 9), timedelta(weeks = 10), None)
+opv3 = Vaccines("opv3", "OPV-3", timedelta(weeks = 13), timedelta(weeks = 14), None)
+ptv1 = Vaccines("ptv1", "Pentavalent-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
+ptv2 = Vaccines("ptv2", "Pentavalent-2", timedelta(weeks = 9), timedelta(weeks = 10), None)
+ptv3 = Vaccines("ptv3", "Pentavalent-3", timedelta(weeks = 13), timedelta(weeks = 14), None)
+rtv1 = Vaccines("rtv1", "Rotavirus-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
+rtv2 = Vaccines("rtv2", "Rotavirus-2", timedelta(weeks = 9), timedelta(weeks = 10), None)
+rtv3 = Vaccines("rtv3", "Rotavirus-3", timedelta(weeks = 13), timedelta(weeks = 14), None)
+ipv1 = Vaccines("ipv1", "IPV-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
+ipv2 = Vaccines("ipv2", "IPV-2", timedelta(weeks = 13), timedelta(weeks = 14), None)
+mr1 = Vaccines("mr1", "Measles-Rubella-1", timedelta(weeks = 4 * 9), timedelta(weeks = 4 * 12), None)
+je1 = Vaccines("je1", "JE-1", timedelta(weeks = 4 * 9), timedelta(weeks = 4 * 12), None)
+va1 = Vaccines("va1", "Vitamin A-1", timedelta(weeks = 4 * 9), timedelta(weeks = 4 * 12), None)
+dpt1 = Vaccines("dpt1", "DPT booster-1", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
+mr2 = Vaccines("mr2", "Measles-Rubella-2", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
+opvb = Vaccines("opvb", "OPV Booster", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
+je2 = Vaccines("je2", "JE-2", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 24), None)
+va2 = Vaccines("va2", "Vitamin A-2", timedelta(weeks = 4 * 16), timedelta(weeks = 4 * 18), None)
+va3 = Vaccines("va3", "Vitamin A-3", timedelta(weeks = 4 * 22), timedelta(weeks = 4 * 24), None)
+dptb = Vaccines("dptb", "DPT Booster-2", timedelta(weeks = 52 * 5), timedelta(weeks = 52 * 6), None)
+tt = Vaccines("tt", "TT", timedelta(weeks = 52 * 10), timedelta(weeks = 52 * 16), None)
 
 Vaccines.vaccineDbUpdate()

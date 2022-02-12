@@ -30,11 +30,11 @@ def validVaccines(dob, childVaxList = vaxlist):
         dueVaccines, overVaccines, yetVaccines = [], [], []
         for vaccine in childVaxList:
             if timedelta(days=vaccine["date_start"]) + dob < presentDay and timedelta(days=vaccine["date_end"]) + dob > presentDay or timedelta(days=vaccine["date_end"]) + dob == presentDay:
-                dueVaccines.append(vaccine)
+                dueVaccines.append(vaccine["vid"])
             elif timedelta(days=vaccine["date_start"]) + dob > presentDay:
-                yetVaccines.append(vaccine)
+                yetVaccines.append(vaccine["vid"])
             elif timedelta(days=vaccine["date_end"])+dob<presentDay:
-                overVaccines.append(vaccine)
+                overVaccines.append(vaccine["vid"])
         return dueVaccines, overVaccines, yetVaccines
 
 
