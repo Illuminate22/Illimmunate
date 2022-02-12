@@ -7,6 +7,9 @@ from kivy.uix.popup import Popup
 from kivy.properties import StringProperty
 from kivy.core.window import Window
 from kivy.config import Config
+import certifi
+
+ca = certifi.where()
 
 import pymongo
 
@@ -16,7 +19,7 @@ from pickle import  dump, load
 
 # from random import choice
 
-client = pymongo.MongoClient("mongodb+srv://user1:honeycake123@cluster0.zd1jh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+client = pymongo.MongoClient("mongodb+srv://user1:honeycake123@cluster0.zd1jh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", tlsCAFile=ca)
 db = client.get_database("database_main")
 rec1 = db.doctor
 rec2 = db.parent
