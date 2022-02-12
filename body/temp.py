@@ -1,9 +1,17 @@
 from datetime import *
+import pymongo
+import certifi
+
+ca = certifi.where()
+
+connection = pymongo.MongoClient("mongodb+srv://user1:honeycake123@cluster0.zd1jh.mongodb.net/database_main?retryWrites=true&w=majority", tlsCAFile=ca)
+db = connection["database_main"]
+vaxcol = db["vaccine"]
 
 class Vaccines:
     vaxlist = []
     def __init__(self, name, date_start, date_end, info):
-        dic = {"name" :name,"date_start" : date_start,"date_end" : date_end,"info" : info}
+        dic = {"name" :name,"date_start" : date_start.days,"date_end" : date_end.days,"info" : info}
         Vaccines.vaxlist.append(dic)
         self.dic = dic
     def __str__(self):
@@ -12,13 +20,16 @@ class Vaccines:
         presentDay = datetime.today()
         dueVaccines, overVaccines, yetVaccines = [], [], []
         for vaccine in childVaxList:
-            if vaccine["date_start"] + dob < presentDay and vaccine["date_end"] + dob > presentDay or vaccine["date_end"] + dob == presentDay:
+            if timedelta(days=vaccine["date_start"]) + dob < presentDay and timedelta(days=vaccine["date_end"]) + dob > presentDay or timedelta(days=vaccine["date_end"]) + dob == presentDay:
                 dueVaccines.append(vaccine)
-            if vaccine["date_start"] + dob > presentDay:
+            elif timedelta(days=vaccine["date_start"]) + dob > presentDay:
                 overVaccines.append(vaccine)
             else:
                 yetVaccines.append(vaccine)
         return dueVaccines, overVaccines, yetVaccines
+    def vaccineDbUpdate():
+        for vaccine in Vaccines.vaxlist:
+            vaxcol.insert_one(vaccine)
 
 opv0 = Vaccines("OPV-0", timedelta(days = 0), timedelta(days = 15), None)
 opv1 = Vaccines("OPV-1", timedelta(weeks = 5), timedelta(weeks = 6), None)
@@ -44,3 +55,4 @@ va3 = Vaccines("Vitamin A-3", timedelta(weeks = 4 * 22), timedelta(weeks = 4 * 2
 dptb = Vaccines("DPT Booster-2", timedelta(weeks = 52 * 5), timedelta(weeks = 52 * 6), None)
 tt = Vaccines("TT", timedelta(weeks = 52 * 10), timedelta(weeks = 52 * 16), None)
 
+Vaccines.vaccineDbUpdate()

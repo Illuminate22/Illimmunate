@@ -1,4 +1,3 @@
-from temp import *
 from datetime import *
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -8,16 +7,35 @@ from kivy.uix.label import Label
 
 children = list(map(lambda item: list(item.values()), childcol.find()))
 parentId = "P1"
+vaxlist = []
 
 def children_get():
     global children
     children = list(map(lambda item: list(item.values()), childcol.find()))
+
+def vaccines_get():
+    global vaxlist
+    for vaccine in vaxcol:
+        vaxlist.append(vaccine)
 
 def create_popup(title, text):
     popup = Popup(title=title,
         content=Label(text=text),
         size_hint=(0.4, 0.4))
     popup.open()
+
+def validVaccines(dob, childVaxList = vaxlist):
+        presentDay = datetime.today()
+        dueVaccines, overVaccines, yetVaccines = [], [], []
+        for vaccine in childVaxList:
+            if timedelta(days=vaccine["date_start"]) + dob < presentDay and timedelta(days=vaccine["date_end"]) + dob > presentDay or timedelta(days=vaccine["date_end"]) + dob == presentDay:
+                dueVaccines.append(vaccine)
+            elif timedelta(days=vaccine["date_start"]) + dob > presentDay:
+                overVaccines.append(vaccine)
+            else:
+                yetVaccines.append(vaccine)
+        return dueVaccines, overVaccines, yetVaccines
+
 
 class ParentScreen(Screen):
     pass
@@ -26,7 +44,7 @@ class AddChildScreen(Screen):
     def addChild(self, name, dob, docid):
         dateOfBirth = datetime(int(dob[6:]), int(dob[3:5]), int(dob[:2]))
         childId = "C" + str(len(children) + 1)
-        dueVaccines, overVaccines, yetVaccines = Vaccines.validVaccines(dateOfBirth)
+        dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
         document = {"pid": parentId, "did": docid, "cid": childId,"name": name, "dob": dateOfBirth, "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines}
         childcol.insert_one(document)
         children_get()
