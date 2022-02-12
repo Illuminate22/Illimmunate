@@ -1,3 +1,6 @@
+
+
+
 <PageOne>:
     name: "one"
     canvas.before:
@@ -5,7 +8,7 @@
             pos: self.pos
             size: self.size
             source: 'injection2.png'
-    
+
     BoxLayout:
         orientation: "vertical"
         padding: "250dp"
@@ -18,7 +21,7 @@
             on_release:
                 app.root.current = "login"
                 root.sign_in_up(0)
-            
+
         Button:
             text: "SignUp"
             font_size: "25dp"
@@ -46,22 +49,22 @@
                 text: "email"
                 color: 0, 0, 0, 1
                 font_size: "20dp"
-            
+
             TextInput:
                 id: email
                 multiline: False
                 size_hint: 1, 0.4
                 pos_hint: {"center_y": 0.5}
 
-        
+
         BoxLayout:
             orientation: "horizontal"
 
-            Label: 
+            Label:
                 text: "Password"
                 color: 0, 0, 0, 1
                 font_size: "20dp"
-            
+
             TextInput:
                 id: passwd
                 password: True
@@ -70,7 +73,7 @@
                 pos_hint: {"center_y": 0.5}
 
 
-            
+
         BoxLayout:
             Label:
                 text: "Remember Me"
@@ -96,10 +99,10 @@
             Button:
                 size_hint:3, 1
                 text: "Submit"
-                on_press: 
+                on_press:
                     root.get_cred(email.text, passwd.text, logged_in.active)
-            
-            Button: 
+
+            Button:
                 size_hint: 1, 1
                 text: "Back"
                 on_press:
@@ -123,22 +126,22 @@
                 text: "email"
                 color: 0, 0, 0, 1
                 font_size: "20dp"
-            
+
             TextInput:
                 id: email
                 multiline: False
                 size_hint: 1, 0.4
                 pos_hint: {"center_y": 0.5}
 
-        
+
         BoxLayout:
             orientation: "horizontal"
 
-            Label: 
+            Label:
                 text: "Password"
                 color: 0, 0, 0, 1
                 font_size: "20dp"
-            
+
             TextInput:
                 id: passwd
                 password: True
@@ -171,8 +174,8 @@
                     color: 0, 0, 0, 1
                     on_active: root.check_box_act(self, self.active, 1)
 
-        
-            
+
+
         BoxLayout:
             Label:
                 text: "Remember Me"
@@ -191,10 +194,10 @@
             Button:
                 size_hint:3, 1
                 text: "Submit"
-                on_press: 
+                on_press:
                     root.get_cred(email.text, passwd.text, logged_in.active)
-            
-            Button: 
+
+            Button:
                 size_hint: 1, 1
                 text: "Back"
                 on_press:
@@ -202,18 +205,47 @@
 
 <Lobby>:
     name: "lobby"
+    view1: view1
+    view2: view2
+    spacing: "50dp"
     BoxLayout:
+        spacing: "50dp"
+        padding: "30dp"
         orientation: "horizontal"
+
         BoxLayout:
+            size_hint: 0.4, 1
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    size_hint : 1, 0.5
+                    pos_hint: {"center_y": 0}
+                    text: "New Patient\n Request"
+                    color: 0, 0, 0, 1
+                    font_size: "25dp"
+
+                ScrollView:
+                    id : view1
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+
+        BoxLayout:
+            orientation: "vertical"
             size_hint: 1, 1
             Label:
 
                 text: "Dashboard"
                 font_size: "25"
                 color: 0, 0, 0, 1
+
+            ScrollView:
+                id: view2
+                do_scroll_x: False
+                do_scroll_y: True
         BoxLayout:
             pos_hint: {"y": 0.9}
-            size_hint: 0.13, 0.1
+            size_hint: 0.24, 0.1
             Spinner:
                 color: 0, 0, 0, 1
                 id: menu
