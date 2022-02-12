@@ -322,6 +322,7 @@
                 on_release: root.manager.current = "plobby"
 
 <ChildScreen>:
+    view1: view1
     BoxLayout:
         orientation: "vertical"
 
@@ -336,13 +337,27 @@
                 group: "menu"
                 text: "Vaccines due\n now"
                 state: "down"
+                on_state: root.due_button
             
             ToggleButton:
                 group: "menu"
                 text: "Vaccines \n taken"
+                on_state: root.over_button
 
             ToggleButton:
                 group: "menu"
                 text: "Vaccines to\n be taken"
+                on_state: root.yet_button
+
+        ScrollView:
+            id : view1
+            do_scroll_x: False
+            do_scroll_y: True    
+
+        Button:
+            text: "Back"
+            on_release: root.manager.current = "plobby"
+            size_hint: 1, 0.1
+
 
 

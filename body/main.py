@@ -262,10 +262,11 @@ class ParentLobby(Screen):
             sm.current = "one"
             sm.remove_widget(plob)
 
-    def child_button_clicked(name):
-        global sm
+    def child_button_clicked(instance):
+        global sm, ch1
+        ch1 = childcol.find_one({"name": instance.text, "pmail": main_mail})
         childwin = ChildScreen(name= "child")
-        childwin.ids.namel.text = name + "'s vaccine\n chart"
+        childwin.ids.namel.text = instance.text + "'s vaccine\n chart"
         sm.add_widget(childwin)
         sm.current = "child"
 
@@ -277,7 +278,7 @@ class ParentLobby(Screen):
         
         for child in childcol.find({"pmail": main_mail}):
             btn = Button(text= child["name"],size_hint = (1, None), height = 50, background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1))
-            btn.bind(on_release = ParentLobby.child_button_clicked(btn.text))
+            btn.bind(on_release = ParentLobby.child_button_clicked)
             layout.add_widget(btn)
 
         scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
@@ -313,7 +314,35 @@ class AddChildScreen(Screen):
         sm.add_widget(plob)
             
 class ChildScreen(Screen):
-    pass
+    view1 = ObjectProperty(None)
+    def due_button(self):
+        global lay1, ch1
+        lay1 = GridLayout(cols=3, spacing=10, size_hint_y=None)
+        lay1.bind(minimum_height=lay1.setter("height"))
+        
+        dueVaccines = ch1["dueVaccines"]
+
+        for vaccine in dueVaccines:
+            lab = Label(text= vaxcol.find_one({"vid":vaccine})["name"],size_hint = (1, None), height = 50, background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1))
+            btn1 = Button(text= "Taken",size_hint = (1, None), height = 50, background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1))
+            btn2 = Button(text= "Info",size_hint = (1, None), height = 50, background_color=(0.5, 0.5, 0.5, 1), color=(1, 1, 1, 1))
+            lay1.add_widget(lab)
+            lay1.add_widget(btn1)
+            lay1.add_widget(btn2)
+
+        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
+        scrollview.add_widget(lay1)
+
+        self.view1.add_widget(scrollview)
+    def over_button():
+        pass
+    def yet_button():
+        pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+        
+
 
 # class ForgotPswd(Screen):
 #     pass
