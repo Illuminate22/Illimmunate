@@ -15,7 +15,7 @@ def children_get():
 
 def vaccines_get():
     global vaxlist
-    for vaccine in vaxcol:
+    for vaccine in vaxcol.find():
         vaxlist.append(vaccine)
 
 def create_popup(title, text):
@@ -25,15 +25,16 @@ def create_popup(title, text):
     popup.open()
 
 def validVaccines(dob, childVaxList = vaxlist):
+        vaccines_get()
         presentDay = datetime.today()
         dueVaccines, overVaccines, yetVaccines = [], [], []
         for vaccine in childVaxList:
             if timedelta(days=vaccine["date_start"]) + dob < presentDay and timedelta(days=vaccine["date_end"]) + dob > presentDay or timedelta(days=vaccine["date_end"]) + dob == presentDay:
                 dueVaccines.append(vaccine)
             elif timedelta(days=vaccine["date_start"]) + dob > presentDay:
-                overVaccines.append(vaccine)
-            else:
                 yetVaccines.append(vaccine)
+            elif timedelta(days=vaccine["date_end"])+dob<presentDay:
+                overVaccines.append(vaccine)
         return dueVaccines, overVaccines, yetVaccines
 
 
@@ -42,13 +43,27 @@ class ParentScreen(Screen):
 
 class AddChildScreen(Screen):
     def addChild(self, name, dob, docid):
-        dateOfBirth = datetime(int(dob[6:]), int(dob[3:5]), int(dob[:2]))
+        try:
+            dateOfBirth = datetime(int(dob[6:]), int(dob[3:5]), int(dob[:2]))
+        except:
+            create_popup("Error!", "Enter a valid date!")
+            self.ids.dobin.text = ""
+            return
+        if name == "":
+            create_popup("Error!", "Enter a valid date!")
+            self.ids.namein.text = ""
+            return
+
         childId = "C" + str(len(children) + 1)
         dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
         document = {"pid": parentId, "did": docid, "cid": childId,"name": name, "dob": dateOfBirth, "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines}
         childcol.insert_one(document)
         children_get()
         create_popup("Success", "Account created successfully!")
+        self.ids.dobin.text = ""
+        self.ids.namein.text = ""
+        self.ids.docin.text = ""
+
 
 
 
