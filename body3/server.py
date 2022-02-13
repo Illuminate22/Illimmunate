@@ -36,11 +36,6 @@ def send_mail(case, child):
     message["From"] = sender_email
     message["To"] = receiver_email
 
-    # text = """\
-    # Hello,
-    # This is to inform u that the due date for the vaccine abc for you child xyz has lapsed
-    # Please administer him/her with a dose of vaccine abc so soon as possible"""
-
     msg_part = MIMEText(msg, "plain")
 
     message.attach(msg_part)
@@ -179,32 +174,36 @@ def main():
         isWarningDay = True
 
     for child in childcol.find():
-        # print(child)
-        try:
-            if presentDate > child["upcomingStartDate"]:
-                startDateScenario(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                upcomingStartingDate(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                send_mail(0, child)
-            if presentDate > child["upcomingMidDate"]:
-                upcomingMidDate(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                send_mail(0, child)
-            if presentDate > child["upcomingEndDate"]:
-                endDateScenario(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                upcomingEndDate(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                send_mail(0, child)
-            print("alive")
-        except:
-            print("dead")
-            if isWarningDay:
-                warningListCheck(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                if child["warningList"] != []:
-                    send_mail(1, child)
 
+
+        if presentDate > child["upcomingStartDate"]:
+            startDateScenario(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            upcomingStartingDate(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            send_mail(0, child)
+        if presentDate > child["upcomingMidDate"]:
+            upcomingMidDate(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            send_mail(0, child)
+        if presentDate > child["upcomingEndDate"]:
+            endDateScenario(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            upcomingEndDate(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            send_mail(0, child)
+
+        if isWarningDay:
+            warningListCheck(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            if child["warningList"] != []:
+                send_mail(1, child)
+
+        print(child)
+# for child in childcol.find():
+#     try:
+#         send_mail(0, child)
+#     except:
+#         send_mail(1, child)
 
 main()

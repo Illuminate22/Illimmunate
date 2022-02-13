@@ -283,7 +283,7 @@ class Login(Screen):
         self.ids.email.text = ""
         self.ids.passwd.text = ""
         self.ids.logged_in = False
-        result = match('[0-9a-z.-_]+@[a-z]+\.[a-z]+', email)
+        result = match('[0-9a-z_.-]+@[a-z]+\.[a-z]+', email)
         if result is None:
             pop_text = "Enter a valid email address"
             Pop().open()
@@ -298,7 +298,7 @@ class SignUp(Screen):
         global sm
         global pop_text
 
-        result = match('[0-9a-z.-_]+@[a-z]+\.[a-z]+', email)
+        result = match('[0-9a-z_.-]+@[a-z]+\.[a-z]+', email)
         if result is None:
             pop_text = "Enter a valid email address"
             Pop().open()
@@ -506,7 +506,7 @@ class AddChildScreen(Screen):
             gender = "F"
         childId = generate_unique_id(2)
         dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
-        document = {"pmail": main_mail, "cid": childId, "did": "", "name": name, "dob": dateOfBirth, "gender": gender,
+        document = {"pmail": main_mail, "cid": childId, "did": "", "name": name, "dob": dateOfBirth, "gender": gender, "info": "",
                     "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines, "warningList": []}
         childcol.insert_one(document)
         chil = childcol.find_one({"cid": childId})
@@ -526,6 +526,7 @@ class ChildScreen(Screen):
     view1 = ObjectProperty(None)
     view2 = ObjectProperty(None)
     view3 = ObjectProperty(None)
+    text1 = StringProperty("")
 
     def doc_det(self):
         global ch1, view_doc, sm
@@ -564,9 +565,14 @@ class ChildScreen(Screen):
             s = f.read()
         create_info_popup("Info", s)
 
+    def add_child_info(self, info):
+        global ch1
+        childcol.update_one({"cid":ch1["cid"]}, {"$set": {"info": info}})
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         global ch1, chbl
+        self.text1 = ch1["info"]
         chbl = []
 
         dueVaccines = ch1["dueVaccines"]
@@ -605,7 +611,6 @@ class ChildScreen(Screen):
 
         if dueVaccines == []:
             lay1 = Label(text="There are no vaccines due at the moment", pos_hint = {"top":1, "center_x":0.5}, font_size= 30)
-            
 
         self.view1.add_widget(lay1)
 
@@ -634,7 +639,6 @@ class ChildScreen(Screen):
 
         if yetVaccines == []:
             lay3 = Label(text="You have taken all vaccines!", pos_hint = {"top":1, "center_x":0.5}, font_size= 30)
-            
 
         self.view3.add_widget(lay3)
 
@@ -658,12 +662,11 @@ class ChildScreen(Screen):
                 btn1 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
                               color=(1, 1, 1, 1))
             lay2.add_widget(lab)
+            if overVaccines == []:
+                lay2 = Label(text="You haven't taken any vaccine yet", pos_hint={"top": 1, "center_x": 0.5},
+                             font_size=30)
 
             lay2.add_widget(btn1)
-        
-        if overVaccines == []:
-            lay2 = Label(text="You haven't taken any vaccine yet", pos_hint = {"top":1, "center_x":0.5}, font_size= 30)
-            
 
         self.view2.add_widget(lay2)
 
@@ -675,6 +678,7 @@ class ChildScreen(Screen):
 
 class ViewPatientProfile(Screen):
     text1 = StringProperty("")
+    text2 = StringProperty("")
     view4 = ObjectProperty(None)
     view5 = ObjectProperty(None)
     view6 = ObjectProperty(None)
@@ -693,6 +697,7 @@ class ViewPatientProfile(Screen):
         print(pat_dat)
         print(mail)
         ch1 = childcol.find_one({"name": pat_dat[2], "pmail": mail})
+        self.text2 = ch1["info"]
         dueVaccines = ch1["dueVaccines"]
         # dueVaccines = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
         overVaccines = ch1["overVaccines"]
@@ -719,7 +724,10 @@ class ViewPatientProfile(Screen):
                     b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0, 0, 0, 0),
                                color=(1, 1, 1, 1))
                 layout.add_widget(b)
-
+            if(len(vac_list[j]) == 0):
+                tex = "None"
+                layout = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0.5, 0.5, 0.5, 1),
+                           color=(1, 1, 1, 1))
             scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
             scrollview.add_widget(layout)
 
@@ -778,6 +786,7 @@ class ConfirmDoc(Popup):
         conf_doc.dismiss()
         add_pop.dismiss()
         req = self.data[-1]
+        print("initial", req)
         db = rec1.find_one({"email": ch1["pmail"]})
         id = db["id"]
         gen = None
@@ -795,6 +804,7 @@ class ConfirmDoc(Popup):
                 flag = False
                 break
         req.append(li)
+        print("req", req)
         if (flag):
             print("ola")
             rec2.update_one({"id": self.data[1]}, {"$set": {"requests": req}})
