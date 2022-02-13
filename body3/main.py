@@ -13,6 +13,7 @@ from datetime import *
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.textinput import TextInput
 
 ca = certifi.where()
 
@@ -55,6 +56,12 @@ def create_popup(title, text):
     popup = Popup(title=title,
                   content=Label(text=text),
                   size_hint=(0.4, 0.4))
+    popup.open()
+
+def create_info_popup(title, text):
+    popup = Popup(title=title,
+                  content=TextInput(text=text, readonly = True),
+                  size_hint=(0.6, 0.6))
     popup.open()
 
 
@@ -395,11 +402,11 @@ class ParentLobby(Screen):
             sm.remove_widget(plob)
 
     def child_button_clicked(instance):
-        global sm, ch1
+        global sm, ch1, childwin
         ch1 = childcol.find_one({"name": instance.text, "pmail": main_mail})
         childwin = ChildScreen(name="child")
         print(ch1, "ch1")
-        childwin.ids.namel.text = instance.text + "'s vaccine\n chart"
+        childwin.ids.namel.text = instance.text + "'s vaccine chart"
         sm.add_widget(childwin)
         sm.current = "child"
 
@@ -415,10 +422,9 @@ class ParentLobby(Screen):
             btn.bind(on_release=ParentLobby.child_button_clicked)
             layout.add_widget(btn)
 
-        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
-        scrollview.add_widget(layout)
+        
 
-        self.view1.add_widget(scrollview)
+        self.view1.add_widget(layout)
 
 
 class AddChildScreen(Screen):
@@ -476,6 +482,13 @@ class ChildScreen(Screen):
         sm.current = "plobby"
         sm.remove_widget(childwin)
 
+    def info_button(instance):
+        vaxname = instance.text[8:]
+        vaccine = vaxcol.find_one({"name":vaxname})
+        with open(vaccine["info"],"r") as f:
+            s = f.read()
+        create_info_popup("Info", s)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         global ch1, chbl
@@ -497,8 +510,10 @@ class ChildScreen(Screen):
                              color=(1, 1, 1, 1))
                 btn1 = CheckBox()
 
-                btn2 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                btn2 = Button(text="Info on "+vaxname, size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
                               color=(1, 1, 1, 1))
+                btn2.bind(on_release= ChildScreen.info_button)
+                
                 chbl.append(btn1)
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
@@ -524,8 +539,9 @@ class ChildScreen(Screen):
 
                 lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
                              color=(1, 1, 1, 1))
-                btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                btn1 = Button(text="Info on "+vaxname, size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
                               color=(1, 1, 1, 1))
+                btn1.bind(on_release= ChildScreen.info_button)
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
                              color=(1, 1, 1, 1))
@@ -547,8 +563,9 @@ class ChildScreen(Screen):
 
                 lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
                              color=(1, 1, 1, 1))
-                btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                btn1 = Button(text="Info on "+vaxname, size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
                               color=(1, 1, 1, 1))
+                btn1.bind(on_release= ChildScreen.info_button)
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
                              color=(1, 1, 1, 1))
@@ -558,9 +575,8 @@ class ChildScreen(Screen):
 
             lay2.add_widget(btn1)
 
-        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
-        scrollview.add_widget(lay2)
-        self.view2.add_widget(scrollview)
+
+        self.view2.add_widget(lay2)
 
 
 # class ForgotPswd(Screen):

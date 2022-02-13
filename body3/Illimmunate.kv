@@ -295,10 +295,14 @@
                 size_hint: 1, 0.1
                 pos_hint: {"top": 1}
 
-            ScrollView:
-                id: view1
-                do_scroll_x: False
-                do_scroll_y: True
+            BoxLayout:
+                pos_hint: {"top":0.9, "left":0}
+                size_hint: 1, 0.9
+                
+                ScrollView:
+                    id: view1
+                    do_scroll_x: False
+                    do_scroll_y: True
 
         BoxLayout:
             pos_hint: {"y": 0.9}
@@ -315,31 +319,45 @@
 <AddChildScreen>:
     BoxLayout:
         orientation: "vertical"
+        padding: "40dp"
 
         GridLayout:
             cols: 2
+            spacing: "20dp"
 
             Label:
                 text: "Enter name"
+                color: 0, 0, 0, 1
 
             TextInput:
                 id: namein
 
             Label:
                 text: "Enter DOB(dd/mm/yyyy)"
+                color: 0, 0, 0, 1
 
             TextInput:
                 id: dobin
 
             Label:
-                text: "Enter doctor ID"
+                text: "Gender"
+                color: 0, 0, 0, 1
 
-            TextInput:
-                id: docin
+            
+            BoxLayout:
+                orientation: "horizontal"
+                ToggleButton:
+                    id: maleb
+                    text: "Male"
+                    group: "gender"
+                ToggleButton:
+                    id: femaleb
+                    text: "Female"
+                    group: "gender"
 
             Button:
                 text: "Done"
-                on_release: root.addChild(namein.text, dobin.text, docin.text)
+                on_release: root.addChild(namein.text, dobin.text, maleb.state, femaleb.state)
 
             Button:
                 text: "Back"
@@ -392,8 +410,8 @@
                     do_scroll_y: True
 
         Button:
-            text: "Back"
-            on_release: root.manager.current = "plobby"
+            text: "Save changes and go back"
+            on_release: root.save_and_back()
             size_hint: 1, 0.1
 
 <ViewPatientProfile>:
