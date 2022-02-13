@@ -1,29 +1,23 @@
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.gridlayout import GridLayout
 from kivy.lang import Builder
-from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.popup import Popup
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.core.window import Window
-from kivy.config import Config
-import certifi
 from datetime import *
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 
-ca = certifi.where()
-
+import certifi
 import pymongo
-
 from re import match
-
 from pickle import dump, load
 
-# from random import choice
+ca = certifi.where()
 
 client = pymongo.MongoClient(
     "mongodb+srv://user1:honeycake123@cluster0.zd1jh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
@@ -58,19 +52,21 @@ def create_popup(title, text):
                   size_hint=(0.4, 0.4))
     popup.open()
 
+
 def create_info_popup(title, text):
     popup = Popup(title=title,
-                  content=TextInput(text=text, readonly = True),
+                  content=TextInput(text=text, readonly=True),
                   size_hint=(0.6, 0.6))
     popup.open()
+
 
 def validVaccines(dob, childVaxList=vaxlist):
     vaccines_get()
     presentDay = datetime.today()
     dueVaccines, overVaccines, yetVaccines = [], [], []
     for vaccine in childVaxList:
-        if timedelta(days=vaccine["date_start"]) + dob < presentDay and timedelta(
-                days=vaccine["date_end"]) + dob > presentDay or timedelta(days=vaccine["date_end"]) + dob == presentDay:
+        if timedelta(days=vaccine["date_start"]) + dob < presentDay < timedelta(
+                days=vaccine["date_end"]) + dob or timedelta(days=vaccine["date_end"]) + dob == presentDay:
             dueVaccines.append(vaccine["vid"])
         elif timedelta(days=vaccine["date_start"]) + dob > presentDay:
             yetVaccines.append(vaccine["vid"])
@@ -78,18 +74,20 @@ def validVaccines(dob, childVaxList=vaxlist):
             overVaccines.append(vaccine["vid"])
     return dueVaccines, overVaccines, yetVaccines
 
+
 def upcomingStartingDate(child):
     dob = child["dob"]
     yetVaccines = child["yetVaccines"]
     earliestStartDate = datetime(9999, 12, 31)
     for vid in yetVaccines:
-        vaccine = vaxcol.find_one({"vid":vid})
-        startDate = dob + timedelta(days =vaccine["date_start"])
+        vaccine = vaxcol.find_one({"vid": vid})
+        startDate = dob + timedelta(days=vaccine["date_start"])
         if startDate < earliestStartDate:
             earliestStartDate = startDate
     child["upcomingStartDate"] = earliestStartDate
     childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingStartDate": earliestStartDate}})
-    child = childcol.find_one({"cid":child["cid"]})
+    child = childcol.find_one({"cid": child["cid"]})
+
 
 def upcomingMidDate(child):
     dob = child["dob"]
@@ -99,9 +97,9 @@ def upcomingMidDate(child):
         dueVaccines = child["yetVaccines"]
     earliestMidDate = datetime(9999, 12, 31)
     for vid in dueVaccines:
-        vaccine = vaxcol.find_one({"vid":vid})
-        timeDifference = timedelta(days=vaccine["date_end"])-timedelta(days=vaccine["date_start"])
-        midDate = dob + timedelta(days=vaccine["date_start"]) + timeDifference/2
+        vaccine = vaxcol.find_one({"vid": vid})
+        timeDifference = timedelta(days=vaccine["date_end"]) - timedelta(days=vaccine["date_start"])
+        midDate = dob + timedelta(days=vaccine["date_start"]) + timeDifference / 2
         if midDate < earliestMidDate:
             earliestMidDate = midDate
     if earliestMidDate > datetime.today():
@@ -110,14 +108,15 @@ def upcomingMidDate(child):
         return
     earliestMidDate = datetime(9999, 12, 31)
     for vid in yetVaccines:
-        vaccine = vaxcol.find_one({"vid":vid})
-        timeDifference = timedelta(days=vaccine["date_end"])-timedelta(days=vaccine["date_start"])
-        midDate = dob + timedelta(days=vaccine["date_start"]) + timeDifference/2
+        vaccine = vaxcol.find_one({"vid": vid})
+        timeDifference = timedelta(days=vaccine["date_end"]) - timedelta(days=vaccine["date_start"])
+        midDate = dob + timedelta(days=vaccine["date_start"]) + timeDifference / 2
         if midDate < earliestMidDate:
             earliestMidDate = midDate
     child["upcomingMidDate"] = earliestMidDate
     childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingMidDate": earliestMidDate}})
-    child = childcol.find_one({"cid":child["cid"]})
+    child = childcol.find_one({"cid": child["cid"]})
+
 
 def upcomingEndDate(child):
     dob = child["dob"]
@@ -126,13 +125,13 @@ def upcomingEndDate(child):
         dueVaccines = child["yetVaccines"]
     earliestEndDate = datetime(9999, 12, 31)
     for vid in dueVaccines:
-        vaccine = vaxcol.find_one({"vid":vid})
+        vaccine = vaxcol.find_one({"vid": vid})
         endDate = dob + timedelta(days=vaccine["date_end"])
         if endDate < earliestEndDate:
             earliestEndDate = endDate
     child["upcomingEndDate"] = earliestEndDate
     childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingEndDate": earliestEndDate}})
-    child = childcol.find_one({"cid":child["cid"]})
+    child = childcol.find_one({"cid": child["cid"]})
 
 
 def get_accounts(cond):
@@ -145,7 +144,6 @@ def get_accounts(cond):
 
 
 def generate_unique_id(case):
-    # li = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f']
     id = str(len(get_accounts(case)) + 1)
 
     for i in range(6 - len(id)):
@@ -153,14 +151,11 @@ def generate_unique_id(case):
 
     if (case == 0):
         id = "P" + id
-    elif(case == 1):
+    elif (case == 1):
         id = "D" + id
     else:
         id = "C" + id
     return id
-
-    # for i in range(6):
-    #     id += choice(li)
 
 
 class Pop(Popup):
@@ -254,8 +249,9 @@ def email_process(case, email, passwd, logged_in, user_type=None):
             if (user_type == 0):
                 rec1.insert_one({"id": id, "email": email, "password": passwd, "children": []})
             else:
-                rec2.insert_one({"id": id, "email": email, "name": "", "password": passwd, "patient": [], "details": ["", "", ""],
-                                 "requests": []})
+                rec2.insert_one(
+                    {"id": id, "email": email, "name": "", "password": passwd, "patient": [], "details": ["", "", ""],
+                     "requests": []})
             if (logged_in):
                 with open("assets/logged_in", "wb") as file:
                     dump(email, file)
@@ -397,16 +393,14 @@ class Lobby(Screen):
 
     def press(self, case, but, req, pat):
         global main_mail, sm, lob, view_pat
-        # dic = rec2.find_one({"email": main_mail})
-        # req = dic["requests"]
-        # patient = dic["patient"]
+
         if (case == 0):
             print("New request")
             print("Button Pressed : ", but.text)
             li = req.pop(int(but.text[0]) - 1)
             pat.append(li)
             rec2.update_one({"email": main_mail}, {"$set": {"patient": pat, "requests": req}})
-            db = rec2.find_one({"email":main_mail})
+            db = rec2.find_one({"email": main_mail})
             did = db["id"]
             print(li)
             childcol.update_one({"cid": li[1]}, {"$set": {"did": did}})
@@ -513,12 +507,8 @@ class AddChildScreen(Screen):
         childId = generate_unique_id(2)
         dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
         document = {"pmail": main_mail, "cid": childId, "did": "", "name": name, "dob": dateOfBirth, "gender": gender,
-                    "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines, "warningList": []}
+                    "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines}
         childcol.insert_one(document)
-        chil = childcol.find_one({"cid": childId})
-        upcomingStartingDate(chil)
-        upcomingMidDate(chil)
-        upcomingEndDate(chil)
         children_get()
         create_popup("Success", "Account created successfully!")
         self.ids.dobin.text = ""
@@ -661,9 +651,10 @@ class ChildScreen(Screen):
 
         self.view2.add_widget(lay2)
 
-
-# class ForgotPswd(Screen):
-#     pass
+    def back(self):
+        global childwin, sm
+        sm.remove_widget(childwin)
+        sm.current = "plobby"
 
 
 class ViewPatientProfile(Screen):
@@ -762,7 +753,8 @@ class ConfirmDoc(Popup):
     def __init__(self, data, **kwargs):
         super(ConfirmDoc, self).__init__(**kwargs)
         self.title = "Confirm Doctor"
-        self.text1 = "Name : " + data[3] + "\n\nemail : " + data[2] +  "\n\nQualification : " + data[-2][0] + "\n\nEducation : " + data[-2][2]
+        self.text1 = "Name : " + data[3] + "\n\nemail : " + data[2] + "\n\nQualification : " + data[-2][
+            0] + "\n\nEducation : " + data[-2][2]
         self.data = data
 
     def add_doc(self):
@@ -773,7 +765,7 @@ class ConfirmDoc(Popup):
         db = rec1.find_one({"email": ch1["pmail"]})
         id = db["id"]
         gen = None
-        if(ch1['gender'] == "M"):
+        if (ch1['gender'] == "M"):
             gen = 1
         else:
             gen = 0
@@ -783,13 +775,14 @@ class ConfirmDoc(Popup):
 
         flag = True
         for i in req:
-            if(i[1] == ch1['cid']):
+            if (i[1] == ch1['cid']):
                 flag = False
                 break
         req.append(li)
-        if(flag):
+        if (flag):
             print("ola")
             rec2.update_one({"id": self.data[1]}, {"$set": {"requests": req}})
+
 
 class AddDocPop(Popup):
     view7 = ObjectProperty("None")
@@ -822,7 +815,7 @@ class AddDocPop(Popup):
 
     def press(self, idx, doc):
         global conf_doc
-        conf_doc = ConfirmDoc(data=doc[int(idx.text[0])-1])
+        conf_doc = ConfirmDoc(data=doc[int(idx.text[0]) - 1])
         conf_doc.open()
 
     def search(self, search_text):
@@ -863,10 +856,10 @@ class ViewDoctor(Screen):
 
     def remove_doc(self):
         global ch1
-        childcol.update_one({"cid":ch1["cid"]}, {"$set": {"did": ""}})
+        childcol.update_one({"cid": ch1["cid"]}, {"$set": {"did": ""}})
         pat = self.doc_profile['patient']
         for i in pat:
-            if(i[1] == ch1["cid"]):
+            if (i[1] == ch1["cid"]):
                 pat.remove(i)
                 break
 
@@ -898,7 +891,6 @@ class Main(App):
         sm.add_widget(PageOne(name="one"))
         sm.add_widget(Login(name="login"))
         sm.add_widget(SignUp(name="signup"))
-        # sm.add_widget(Lobby(name="lobby"))
         sm.add_widget(AddChildScreen(name="addchild"))
         Window.clearcolor = (1, 1, 1, 1)
         Window.size = (800, 750)

@@ -289,20 +289,29 @@
         BoxLayout:
             orientation: "vertical"
             spacing: "50dp"
-            Button:
-                text: "Add child details"
-                on_release: root.manager.current = "addchild"
-                size_hint: 1, 0.1
-#                pos_hint: {"top": 1}
+
+            Label:
+                size_hint: 1, 1
+                text: "My Children"
+                font_size: "25dp"
+                color: 0, 0, 0, 1
 
             ScrollView:
                 id: view1
+                size_hint: 1, 3
                 do_scroll_x: False
                 do_scroll_y: True
+
+            Button:
+                size_hint: 1, 1
+                text: "Add child details"
+                on_release: root.manager.current = "addchild"
+#               pos_hint: {"top": 1}
 
         BoxLayout:
             pos_hint: {"y": 0.9}
             size_hint: 0.24, 0.1
+
             Spinner:
                 color: 0, 0, 0, 1
                 id: menu
@@ -311,6 +320,7 @@
                 background_normal: ''
                 background_color: (255.0/255.0, 240.0/255.0, 0, 1)
                 on_text: root.menu_clicked(menu.text)
+
 
 <AddChildScreen>:
     BoxLayout:
@@ -408,7 +418,8 @@
 
         Button:
             text: "Back"
-            on_release: root.manager.current = "plobby"
+            on_release:
+                root.back()
             size_hint: 1, 0.1
 
 <ViewPatientProfile>:
@@ -535,9 +546,10 @@
         Label:
             size_hint: 1, 1
             text: root.text1
+            font_size: "25dp"
             color: 0, 0, 0, 1
         Label:
-            size_hint: 1, 3
+            size_hint: 1, 4
             text: root.text2
             color: 0, 0, 0, 1
         BoxLayout:
