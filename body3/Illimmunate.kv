@@ -354,23 +354,25 @@
 
             TabbedPanelItem:
                 text: "Vaccines\n taken"
-
-                ScrollView:
-                    id : view2
-                    do_scroll_x: False
-                    do_scroll_y: True
+                BoxLayout:
+                    
+                    ScrollView:
+                        id : view2
+                        do_scroll_x: False
+                        do_scroll_y: True
 
             TabbedPanelItem:
                 text: "Vaccines to be\n taken"
-
-                ScrollView:
-                    id : view3
-                    do_scroll_x: False
-                    do_scroll_y: True
+                BoxLayout:
+                    
+                    ScrollView:
+                        id : view3
+                        do_scroll_x: False
+                        do_scroll_y: True
 
         Button:
-            text: "Back"
-            on_release: root.manager.current = "plobby"
+            text: "Save changes and go back"
+            on_release: root.save_and_back()
             size_hint: 1, 0.1
 
 <ViewPatientProfile>:

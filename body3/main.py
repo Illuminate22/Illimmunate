@@ -12,6 +12,7 @@ from datetime import *
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.checkbox import CheckBox
 
 ca = certifi.where()
 
@@ -361,7 +362,7 @@ class ParentLobby(Screen):
             sm.remove_widget(plob)
 
     def child_button_clicked(instance):
-        global sm, ch1
+        global sm, ch1, childwin
         ch1 = childcol.find_one({"name": instance.text, "pmail": main_mail})
         childwin = ChildScreen(name="child")
         print(ch1, "ch1")
@@ -421,18 +422,26 @@ class ChildScreen(Screen):
     view2 = ObjectProperty(None)
     view3 = ObjectProperty(None)
 
-    def due_button(self):
-        pass
-
-    def over_button(self):
-        pass
-
-    def yet_button(self):
-        pass
+    def save_and_back(self):
+        global chbl, ch1, sm, childwin
+        actl = []
+        for i in range(len(chbl)-1, -1, -1):
+            if chbl[i].active:
+                actl.append(i)
+        dueVaccines = ch1["dueVaccines"]
+        overVaccines = ch1["overVaccines"]
+        for j in actl:
+            overVaccines.append(dueVaccines.pop(j))
+        #print(dueVaccines, overVaccines)
+        childcol.update_one({"cid": ch1["cid"]}, {"$set":{"dueVaccines": dueVaccines, "overVaccines": overVaccines}})
+        ch1 = childcol.find_one({"cid": ch1["cid"]})
+        sm.current = "plobby"
+        sm.remove_widget(childwin)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        global ch1
+        global ch1, chbl
+        chbl = []
 
         dueVaccines = ch1["dueVaccines"]
         overVaccines = ch1["overVaccines"]
@@ -441,32 +450,50 @@ class ChildScreen(Screen):
         lay1 = GridLayout(cols=3, spacing=10, size_hint_y=None)
         lay1.bind(minimum_height=lay1.setter("height"))
 
-        for vaccine in dueVaccines:
-            vaxname = vaxcol.find_one({"vid": vaccine})["name"]
+        for i in range(24):
+            try:
+                vaccine = dueVaccines[i]
+                vaxname = vaxcol.find_one({"vid": vaccine})["name"]
 
-            lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
-                         color=(1, 1, 1, 1))
-            btn1 = Button(text="Taken", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                          color=(1, 1, 1, 1))
+                lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
+                            color=(1, 1, 1, 1))
+                btn1 = CheckBox()
 
-            btn2 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                          color=(1, 1, 1, 1))
+                btn2 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                            color=(1, 1, 1, 1))
+                chbl.append(btn1)
+            except:
+                lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
+                               color=(1, 1, 1, 1))
+                btn1 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
+                               color=(1, 1, 1, 1))
+
+                btn2 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
+                               color=(1, 1, 1, 1))
             lay1.add_widget(lab)
             lay1.add_widget(btn1)
             lay1.add_widget(btn2)
+            
 
         self.view1.add_widget(lay1)
 
         lay3 = GridLayout(cols=2, spacing=10, size_hint_y=None)
         lay3.bind(minimum_height=lay1.setter("height"))
 
-        for vaccine in yetVaccines:
-            vaxname = vaxcol.find_one({"vid": vaccine})["name"]
+        for i in range(24):
+            try:
+                vaccine = yetVaccines[i]
+                vaxname = vaxcol.find_one({"vid": vaccine})["name"]
 
-            lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
-                         color=(1, 1, 1, 1))
-            btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                          color=(1, 1, 1, 1))
+                lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
+                            color=(1, 1, 1, 1))
+                btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                            color=(1, 1, 1, 1))
+            except:
+                lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
+                               color=(1, 1, 1, 1))
+                btn1 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
+                               color=(1, 1, 1, 1))
             lay3.add_widget(lab)
 
             lay3.add_widget(btn1)
@@ -476,23 +503,29 @@ class ChildScreen(Screen):
         lay2 = GridLayout(cols=2, spacing=10, size_hint_y=None)
         lay2.bind(minimum_height=lay1.setter("height"))
 
-        for vaccine in overVaccines:
-            vaxname = vaxcol.find_one({"vid": vaccine})["name"]
+        for i in range(24):
+            try:
+                vaccine = overVaccines[i]
+                vaxname = vaxcol.find_one({"vid": vaccine})["name"]
 
-            lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
-                         color=(1, 1, 1, 1))
-            btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                          color=(1, 1, 1, 1))
+                lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
+                            color=(1, 1, 1, 1))
+                btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                            color=(1, 1, 1, 1))
+            except:
+                lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
+                               color=(1, 1, 1, 1))
+                btn1 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
+                               color=(1, 1, 1, 1))
             lay2.add_widget(lab)
 
             lay2.add_widget(btn1)
-        self.view2.add_widget(lay2)
 
-    def over_button(self):
-        pass
+        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
+        scrollview.add_widget(lay2)
+        self.view2.add_widget(scrollview)
 
-    def yet_button(self):
-        pass
+    
 
 
 # class ForgotPswd(Screen):
