@@ -76,7 +76,7 @@ def upcomingMidDate(child):
         midDate = dob + timedelta(days=vaccine["date_start"]) + timeDifference / 2
         if midDate < earliestMidDate:
             earliestMidDate = midDate
-    if earliestMidDate > datetime.today():
+    if earliestMidDate > datetime(2022, 3, 6):
         child["upcomingMidDate"] = earliestMidDate
         childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingMidDate": earliestMidDate}})
         return
@@ -95,6 +95,9 @@ def upcomingMidDate(child):
 def upcomingEndDate(child):
     dob = child["dob"]
     dueVaccines = child["dueVaccines"]
+    warningList = child["warningList"]
+    if warningList != []:
+        dueVaccines = child["yetVaccines"]
     earliestEndDate = datetime(9999, 12, 31)
     for vid in dueVaccines:
         vaccine = vaxcol.find_one({"vid": vid})
@@ -108,7 +111,7 @@ def upcomingEndDate(child):
 
 def startDateScenario(child):
     dob = child["dob"]
-    presentDay = datetime.today()
+    presentDay = datetime(2022, 3, 6)
     yetVaccines = child["yetVaccines"]
     dueVaccines = child["dueVaccines"]
     startedList = []
@@ -125,13 +128,14 @@ def startDateScenario(child):
 
 def endDateScenario(child):
     dob = child["dob"]
-    presentDay = datetime.today()
+    presentDay = datetime(2022, 3, 6)
     dueVaccines = child["dueVaccines"]
     warningList = child["warningList"]
     for vid in dueVaccines:
         vaccine = vaxcol.find_one({"vid": vid})
         if presentDay > dob + timedelta(days=vaccine["date_end"]):
-            warningList.append(vid)
+            if vid not in warningList:
+                warningList.append(vid)
     childcol.update_one({"cid": child["cid"]}, {"$set": {"warningList": warningList}})
     child = childcol.find_one({"cid": child["cid"]})
 
@@ -152,8 +156,8 @@ def warningListCheck(child):
 def get_vac_text(case, child):
     if(case == 0):
         text = f"""\
-        Hello,
-        This is to inform u that the for the following vaccines can now be administered to you child, {child["name"]}"""
+Hello,
+This is to inform you that the for the following vaccines can now be administered to you child, {child["name"]}"""
         li = child["dueVaccines"]
 
         for i in range(len(li)):
@@ -162,9 +166,9 @@ def get_vac_text(case, child):
         return text
     else:
         text = f"""\
-        Hello,
-        This is to inform u that the due date for the following vaccines for you child, {child["name"]},  has lapsed.
-        Please administer him/her with a dose of vaccine so soon as possible"""
+Hello,
+This is to inform u that the due date for the following vaccines for you child, {child["name"]},  has lapsed.
+Please administer him/her with a dose of vaccine so soon as possible"""
         li = child["warningList"]
 
         for i in range(len(li)):
@@ -173,38 +177,38 @@ def get_vac_text(case, child):
         return text
 
 def main():
-    presentDate = datetime.today()
+    presentDate = datetime(2022, 3, 6)
     isWarningDay = False
     if presentDate.day % 6 == 0:
         isWarningDay = True
 
     for child in childcol.find():
         # print(child)
-        try:
-            if presentDate > child["upcomingStartDate"]:
-                startDateScenario(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                upcomingStartingDate(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                send_mail(0, child)
-            if presentDate > child["upcomingMidDate"]:
-                upcomingMidDate(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                send_mail(0, child)
-            if presentDate > child["upcomingEndDate"]:
-                endDateScenario(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                upcomingEndDate(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                send_mail(0, child)
-            print("alive")
-        except:
-            print("dead")
-            if isWarningDay:
-                warningListCheck(child)
-                child = childcol.find_one({"cid": child["cid"]})
-                if child["warningList"] != []:
-                    send_mail(1, child)
+        
+        if presentDate > child["upcomingStartDate"]:
+            startDateScenario(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            upcomingStartingDate(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            send_mail(0, child)
+        if presentDate > child["upcomingMidDate"]:
+            upcomingMidDate(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            send_mail(0, child)
+        if presentDate > child["upcomingEndDate"]:
+            endDateScenario(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            upcomingEndDate(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            send_mail(0, child)
+        print("alive")
+    
+        print("dead")
+        if isWarningDay:
+            warningListCheck(child)
+            child = childcol.find_one({"cid": child["cid"]})
+            if child["warningList"] != []:
+                send_mail(1, child)
 
 
 main()
