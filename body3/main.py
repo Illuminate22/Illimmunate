@@ -78,6 +78,62 @@ def validVaccines(dob, childVaxList=vaxlist):
             overVaccines.append(vaccine["vid"])
     return dueVaccines, overVaccines, yetVaccines
 
+def upcomingStartingDate(child):
+    dob = child["dob"]
+    yetVaccines = child["yetVaccines"]
+    earliestStartDate = datetime(9999, 12, 31)
+    for vid in yetVaccines:
+        vaccine = vaxcol.find_one({"vid":vid})
+        startDate = dob + timedelta(days =vaccine["date_start"])
+        if startDate < earliestStartDate:
+            earliestStartDate = startDate
+    child["upcomingStartDate"] = earliestStartDate
+    childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingStartDate": earliestStartDate}})
+    child = childcol.find_one({"cid":child["cid"]})
+
+def upcomingMidDate(child):
+    dob = child["dob"]
+    yetVaccines = child["yetVaccines"]
+    dueVaccines = child["dueVaccines"]
+    if dueVaccines == []:
+        dueVaccines = child["yetVaccines"]
+    earliestMidDate = datetime(9999, 12, 31)
+    for vid in dueVaccines:
+        vaccine = vaxcol.find_one({"vid":vid})
+        timeDifference = timedelta(days=vaccine["date_end"])-timedelta(days=vaccine["date_start"])
+        midDate = dob + timedelta(days=vaccine["date_start"]) + timeDifference/2
+        if midDate < earliestMidDate:
+            earliestMidDate = midDate
+    if earliestMidDate > datetime.today():
+        child["upcomingMidDate"] = earliestMidDate
+        childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingMidDate": earliestMidDate}})
+        return
+    earliestMidDate = datetime(9999, 12, 31)
+    for vid in yetVaccines:
+        vaccine = vaxcol.find_one({"vid":vid})
+        timeDifference = timedelta(days=vaccine["date_end"])-timedelta(days=vaccine["date_start"])
+        midDate = dob + timedelta(days=vaccine["date_start"]) + timeDifference/2
+        if midDate < earliestMidDate:
+            earliestMidDate = midDate
+    child["upcomingMidDate"] = earliestMidDate
+    childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingMidDate": earliestMidDate}})
+    child = childcol.find_one({"cid":child["cid"]})
+
+def upcomingEndDate(child):
+    dob = child["dob"]
+    dueVaccines = child["dueVaccines"]
+    if dueVaccines == []:
+        dueVaccines = child["yetVaccines"]
+    earliestEndDate = datetime(9999, 12, 31)
+    for vid in dueVaccines:
+        vaccine = vaxcol.find_one({"vid":vid})
+        endDate = dob + timedelta(days=vaccine["date_end"])
+        if endDate < earliestEndDate:
+            earliestEndDate = endDate
+    child["upcomingEndDate"] = earliestEndDate
+    childcol.update_one({"cid": child["cid"]}, {"$set": {"upcomingEndDate": earliestEndDate}})
+    child = childcol.find_one({"cid":child["cid"]})
+
 
 def get_accounts(cond):
     if (cond == 0):
@@ -457,8 +513,12 @@ class AddChildScreen(Screen):
         childId = generate_unique_id(2)
         dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
         document = {"pmail": main_mail, "cid": childId, "did": "", "name": name, "dob": dateOfBirth, "gender": gender,
-                    "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines}
+                    "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines, "warningList": []}
         childcol.insert_one(document)
+        chil = childcol.find_one({"cid": childId})
+        upcomingStartingDate(chil)
+        upcomingMidDate(chil)
+        upcomingEndDate(chil)
         children_get()
         create_popup("Success", "Account created successfully!")
         self.ids.dobin.text = ""
