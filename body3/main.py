@@ -283,7 +283,7 @@ class Login(Screen):
         self.ids.email.text = ""
         self.ids.passwd.text = ""
         self.ids.logged_in = False
-        result = match('[0-9a-z]+@[a-z]+\.[a-z]+', email)
+        result = match('[0-9a-z.-_]+@[a-z]+\.[a-z]+', email)
         if result is None:
             pop_text = "Enter a valid email address"
             Pop().open()
@@ -298,7 +298,7 @@ class SignUp(Screen):
         global sm
         global pop_text
 
-        result = match('[0-9a-z]+@[a-z]+\.[a-z]+', email)
+        result = match('[0-9a-z.-_]+@[a-z]+\.[a-z]+', email)
         if result is None:
             pop_text = "Enter a valid email address"
             Pop().open()
@@ -461,7 +461,7 @@ class ParentLobby(Screen):
         ch1 = childcol.find_one({"name": instance.text, "pmail": main_mail})
         childwin = ChildScreen(name="child")
         print(ch1, "ch1")
-        childwin.ids.namel.text = instance.text + "'s vaccine\n chart"
+        childwin.ids.namel.text = instance.text + "'s vaccine chart"
         sm.add_widget(childwin)
         sm.current = "child"
 
@@ -507,8 +507,12 @@ class AddChildScreen(Screen):
         childId = generate_unique_id(2)
         dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
         document = {"pmail": main_mail, "cid": childId, "did": "", "name": name, "dob": dateOfBirth, "gender": gender,
-                    "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines}
+                    "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines, "warningList": []}
         childcol.insert_one(document)
+        chil = childcol.find_one({"cid": childId})
+        upcomingStartingDate(chil)
+        upcomingMidDate(chil)
+        upcomingEndDate(chil)
         children_get()
         create_popup("Success", "Account created successfully!")
         self.ids.dobin.text = ""
@@ -599,6 +603,10 @@ class ChildScreen(Screen):
             lay1.add_widget(btn1)
             lay1.add_widget(btn2)
 
+        if dueVaccines == []:
+            lay1 = Label(text="There are no vaccines due at the moment", pos_hint = {"top":1, "center_x":0.5}, font_size= 30)
+            
+
         self.view1.add_widget(lay1)
 
         lay3 = GridLayout(cols=2, spacing=10, size_hint_y=None)
@@ -624,6 +632,10 @@ class ChildScreen(Screen):
 
             lay3.add_widget(btn1)
 
+        if yetVaccines == []:
+            lay3 = Label(text="You have taken all vaccines!", pos_hint = {"top":1, "center_x":0.5}, font_size= 30)
+            
+
         self.view3.add_widget(lay3)
 
         lay2 = GridLayout(cols=2, spacing=10, size_hint_y=None)
@@ -648,6 +660,10 @@ class ChildScreen(Screen):
             lay2.add_widget(lab)
 
             lay2.add_widget(btn1)
+        
+        if overVaccines == []:
+            lay2 = Label(text="You haven't taken any vaccine yet", pos_hint = {"top":1, "center_x":0.5}, font_size= 30)
+            
 
         self.view2.add_widget(lay2)
 
@@ -761,7 +777,7 @@ class ConfirmDoc(Popup):
         global conf_doc, add_pop, ch1
         conf_doc.dismiss()
         add_pop.dismiss()
-        req = self.data[-3]
+        req = self.data[-1]
         db = rec1.find_one({"email": ch1["pmail"]})
         id = db["id"]
         gen = None
