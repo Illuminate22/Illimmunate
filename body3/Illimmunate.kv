@@ -292,31 +292,44 @@
 <AddChildScreen>:
     BoxLayout:
         orientation: "vertical"
+        padding: "40dp"
 
         GridLayout:
             cols: 2
+            spacing: "20dp"
 
             Label:
                 text: "Enter name"
+                color: 0, 0, 0, 1
 
             TextInput:
                 id: namein
 
             Label:
                 text: "Enter DOB(dd/mm/yyyy)"
+                color: 0, 0, 0, 1
 
             TextInput:
                 id: dobin
 
             Label:
-                text: "Enter doctor ID"
+                text: "Gender"
+                color: 0, 0, 0, 1
 
-            TextInput:
-                id: docin
+            BoxLayout:
+                orientation: "horizontal"
+                ToggleButton:
+                    id: maleb
+                    text: "Male"
+                    group: "gender"
+                ToggleButton:
+                    id: femaleb
+                    text: "Female"
+                    group: "gender"
 
             Button:
                 text: "Done"
-                on_release: root.addChild(namein.text, dobin.text, docin.text)
+                on_release: root.addChild(namein.text, dobin.text, maleb.state, femaleb.state)
 
             Button:
                 text: "Back"

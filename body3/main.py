@@ -389,7 +389,7 @@ class ParentLobby(Screen):
 
 
 class AddChildScreen(Screen):
-    def addChild(self, name, dob, docid):
+    def addChild(self, name, dob, malestate, femalestate):
         global plob
         try:
             dateOfBirth = datetime(int(dob[6:]), int(dob[3:5]), int(dob[:2]))
@@ -401,17 +401,23 @@ class AddChildScreen(Screen):
             create_popup("Error!", "Enter a valid date!")
             self.ids.namein.text = ""
             return
+        if malestate == "normal" and femalestate == "normal":
+            create_popup("Error!", "Enter a gender!")
+            return
 
+        if malestate == "down":
+            gender = "M"
+        if femalestate == "down":
+            gender = "F"
         childId = "C" + str(len(children) + 1)
         dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
-        document = {"pmail": main_mail, "did": docid, "cid": childId, "name": name, "dob": dateOfBirth,
+        document = {"pmail": main_mail, "cid": childId, "name": name, "dob": dateOfBirth, "gender": gender,
                     "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines}
         childcol.insert_one(document)
         children_get()
         create_popup("Success", "Account created successfully!")
         self.ids.dobin.text = ""
         self.ids.namein.text = ""
-        self.ids.docin.text = ""
         sm.remove_widget(plob)
         plob = ParentLobby(name="plobby")
         sm.add_widget(plob)
@@ -478,7 +484,7 @@ class ChildScreen(Screen):
         self.view1.add_widget(lay1)
 
         lay3 = GridLayout(cols=2, spacing=10, size_hint_y=None)
-        lay3.bind(minimum_height=lay1.setter("height"))
+        lay3.bind(minimum_height=lay3.setter("height"))
 
         for i in range(24):
             try:
@@ -501,7 +507,7 @@ class ChildScreen(Screen):
         self.view3.add_widget(lay3)
 
         lay2 = GridLayout(cols=2, spacing=10, size_hint_y=None)
-        lay2.bind(minimum_height=lay1.setter("height"))
+        lay2.bind(minimum_height=lay2.setter("height"))
 
         for i in range(24):
             try:
