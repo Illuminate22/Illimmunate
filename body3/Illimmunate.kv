@@ -377,10 +377,11 @@
     view3: view3
     BoxLayout:
         orientation: "vertical"
-
+        spacing: "20dp"
+        padding: "20dp"
         BoxLayout:
             orientation: "horizontal"
-            size_hint: 1, 0.05
+            size_hint: 1, 0.5
 
             Label:
                 id: namel
@@ -390,8 +391,9 @@
                 on_press: root.doc_det()
 
         TabbedPanel:
+            size_hint: 1 ,2.5
             do_default_tab: False
-
+            tab_pos: 'top_mid'
             TabbedPanelItem:
                 text: "Vaccines \ndue now"
 
@@ -418,11 +420,24 @@
                     do_scroll_x: False
                     do_scroll_y: True
 
+        BoxLayout:
+            size_hint: 1 ,1
+            spacing: "10dp"
+            TextInput:
+                size_hint: 3, 1
+                id: info
+                hint_text: "Enter something about your child. This can be seen by the doctor"
+                text: root.text1
+            Button:
+                size_hint: 1, 1
+                text: "add"
+                on_press:
+                    root.add_child_info(info.text)
         Button:
             text: "Back"
             on_release:
                 root.back()
-            size_hint: 1, 0.1
+            size_hint: 1, 0.5
 
 <ViewPatientProfile>:
     name: "view_pat"
@@ -476,8 +491,9 @@
                     do_scroll_y: True
             TabbedPanelItem:
                 text: "Other\nInformation"
-                Label:
-                    text: "info "
+                TextInput:
+                    text: root.text2
+                    disabled: True
 
         Button:
             size_hint: 1, 1
