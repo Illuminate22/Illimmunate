@@ -6,7 +6,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'injection2.png'
+            source: 'assets/injection2.png'
 
     BoxLayout:
         orientation: "vertical"
@@ -287,22 +287,18 @@
         padding: "30dp"
 
         BoxLayout:
-            orientaion: "vertical"
-
+            orientation: "vertical"
+            spacing: "50dp"
             Button:
                 text: "Add child details"
                 on_release: root.manager.current = "addchild"
                 size_hint: 1, 0.1
-                pos_hint: {"top": 1}
+#                pos_hint: {"top": 1}
 
-            BoxLayout:
-                pos_hint: {"top":0.9, "left":0}
-                size_hint: 1, 0.9
-                
-                ScrollView:
-                    id: view1
-                    do_scroll_x: False
-                    do_scroll_y: True
+            ScrollView:
+                id: view1
+                do_scroll_x: False
+                do_scroll_y: True
 
         BoxLayout:
             pos_hint: {"y": 0.9}
@@ -343,7 +339,7 @@
                 text: "Gender"
                 color: 0, 0, 0, 1
 
-            
+
             BoxLayout:
                 orientation: "horizontal"
                 ToggleButton:
@@ -379,6 +375,7 @@
                 color: 0, 0, 0, 1
             Button:
                 text: 'Doctor details'
+                on_press: root.doc_det()
 
         TabbedPanel:
             do_default_tab: False
@@ -410,8 +407,8 @@
                     do_scroll_y: True
 
         Button:
-            text: "Save changes and go back"
-            on_release: root.save_and_back()
+            text: "Back"
+            on_release: root.manager.current = "plobby"
             size_hint: 1, 0.1
 
 <ViewPatientProfile>:
@@ -477,6 +474,7 @@
 
 
 <DocEditProfile>:
+    name: "deditprof"
     BoxLayout:
         orientation: "vertical"
         padding: "40dp"
@@ -527,3 +525,76 @@
             Button:
                 text: "Back"
                 on_press: root.back()
+
+<ViewDoctor>:
+    name: "view_doc"
+    BoxLayout:
+        orientation: "vertical"
+        padding: "50dp"
+        spacing: "50dp"
+        Label:
+            size_hint: 1, 1
+            text: root.text1
+            color: 0, 0, 0, 1
+        Label:
+            size_hint: 1, 3
+            text: root.text2
+            color: 0, 0, 0, 1
+        BoxLayout:
+            size_hint: 1, 1
+            spacing: "20dp"
+            Button:
+                size_hint: 2, 1
+                text: "Add / Change Doctor"
+                on_press:
+                    root.add_doc_pop()
+            Button:
+                size_hint: 1, 1
+                text: "Remove Doctor"
+                background_normal: ''
+                background_color: (1, 0.0/255.0, 0.0/255.0, 1)
+                on_press:
+                    root.remove_doc()
+        Button:
+            size_hint: 1, 0.5
+            text: "Back"
+            on_press: root.back()
+
+<AddDocPop>:
+    view7: view7
+    size_hint: (0.6, 0.8)
+    pos_hint: {"x": 0.2, "top": 0.9}
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            spacing: "10dp"
+            TextInput:
+                size_hint: 2, 1
+                id: search
+                multiline: False
+                hint_text: "Enter Doctor name"
+            Button:
+                text: "Search"
+                on_press:
+                    root.search(search.text)
+
+
+        ScrollView:
+            size_hint: 1, 3
+            id: view7
+            do_scroll_x: False
+            do_scroll_y: True
+
+<ConfirmDoc>:
+    size_hint: (0.6, 0.8)
+    pos_hint: {"x": 0.2, "top": 0.9}
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            size_hint: 1, 3
+            text: root.text1
+        Button:
+            size_hint: 1, 1
+            text: "Add/Change"
+            on_press:
+                root.add_doc()

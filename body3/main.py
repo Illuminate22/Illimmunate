@@ -64,7 +64,6 @@ def create_info_popup(title, text):
                   size_hint=(0.6, 0.6))
     popup.open()
 
-
 def validVaccines(dob, childVaxList=vaxlist):
     vaccines_get()
     presentDay = datetime.today()
@@ -98,9 +97,10 @@ def generate_unique_id(case):
 
     if (case == 0):
         id = "P" + id
-    else:
+    elif(case == 1):
         id = "D" + id
-
+    else:
+        id = "C" + id
     return id
 
     # for i in range(6):
@@ -144,7 +144,7 @@ def email_process(case, email, passwd, logged_in, user_type=None):
                 break
         if (flag1 == False):
             for i in doc:
-                if i[2] == email and i[3] == passwd:
+                if i[2] == email and i[4] == passwd:
                     flag2 = True
                     id = i[1]
                     break
@@ -161,7 +161,7 @@ def email_process(case, email, passwd, logged_in, user_type=None):
             main_mail = email
             main_user_type = u_type
             if (logged_in):
-                with open("logged_in", "wb") as file:
+                with open("assets/logged_in", "wb") as file:
                     dump(email, file)
                     dump(id, file)
             if main_user_type == 0:
@@ -198,10 +198,10 @@ def email_process(case, email, passwd, logged_in, user_type=None):
             if (user_type == 0):
                 rec1.insert_one({"id": id, "email": email, "password": passwd, "children": []})
             else:
-                rec2.insert_one({"id": id, "email": email, "name": "", "password": passwd, "patient": [], "details": [],
+                rec2.insert_one({"id": id, "email": email, "name": "", "password": passwd, "patient": [], "details": ["", "", ""],
                                  "requests": []})
             if (logged_in):
-                with open("logged_in", "wb") as file:
+                with open("assets/logged_in", "wb") as file:
                     dump(email, file)
                     dump(id, file)
             if main_user_type == 0:
@@ -272,7 +272,7 @@ class Lobby(Screen):
         global sm, lob, edit_win
         if (value == "Sign Out"):
             self.ids.menu.text = "Home"
-            with open("logged_in", "wb"):
+            with open("assets/logged_in", "wb"):
                 pass
             sm.remove_widget(lob)
             sm.current = "one"
@@ -290,10 +290,10 @@ class Lobby(Screen):
         patient = dic["patient"]
         return req, patient
 
-    def __init__(self,r, p, **kwargs):
+    def __init__(self, r, p, **kwargs):
         super().__init__(**kwargs)
         global main_mail
-        if(r == None and p == None):
+        if (r == None and p == None):
             self.req, self.patient = self.get_data(main_mail)
         else:
             self.req, self.patient = r, p
@@ -307,7 +307,7 @@ class Lobby(Screen):
                 tex = str(i + 1) + " " + self.req[i][2]
                 b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0.5, 0.5, 0.5, 1),
                            color=(1, 1, 1, 1))
-                b.bind(on_press=lambda idx=i: self.press(0, idx))
+                b.bind(on_press=lambda idx=i: self.press(0, idx, self.req, self.patient))
             except:
                 tex = ""
                 b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0, 0, 0, 0),
@@ -347,10 +347,13 @@ class Lobby(Screen):
         if (case == 0):
             print("New request")
             print("Button Pressed : ", but.text)
-            li = req[int(but.text[0]) - 1]
-            req.pop(int(but.text[0]) - 1)
+            li = req.pop(int(but.text[0]) - 1)
             pat.append(li)
             rec2.update_one({"email": main_mail}, {"$set": {"patient": pat, "requests": req}})
+            db = rec2.find_one({"email":main_mail})
+            did = db["id"]
+            print(li)
+            childcol.update_one({"cid": li[1]}, {"$set": {"did": did}})
             sm.remove_widget(lob)
             lob = Lobby(r=None, p=None, name="lobby")
             sm.add_widget(lob)
@@ -362,20 +365,21 @@ class Lobby(Screen):
             sm.add_widget(view_pat)
             sm.current = "view_pat"
 
-    def search(self, case, search_name = None):
+    def search(self, case, search_name=None):
         global lob, main_mail
-        if(case == 0):
+        if (case == 0):
             count = 0
 
             req, pat = self.get_data(main_mail)
             temp = self.patient.copy()
             for i in range(len(pat)):
-                if(search_name not in pat[i-count][2]):
-                    pat.pop(i-count)
+                tex = pat[i - count][2].lower()
+                if (search_name.lower() not in tex):
+                    pat.pop(i - count)
                     count += 1
             sm.remove_widget(lob)
 
-            if(len(temp) > len(self.patient)):
+            if (len(temp) > len(self.patient)):
                 lob = Lobby(r=req, p=temp, name="lobby")
             else:
                 lob = Lobby(r=self.req, p=pat, name="lobby")
@@ -389,6 +393,7 @@ class Lobby(Screen):
             sm.add_widget(lob)
             sm.current = "lobby"
 
+
 class ParentLobby(Screen):
     view1 = ObjectProperty(None)
 
@@ -396,7 +401,7 @@ class ParentLobby(Screen):
         global sm, plob
         if (value == "Sign Out"):
             self.ids.menu.text = "Home"
-            with open("logged_in", "wb"):
+            with open("assets/logged_in", "wb"):
                 pass
             sm.current = "one"
             sm.remove_widget(plob)
@@ -406,7 +411,7 @@ class ParentLobby(Screen):
         ch1 = childcol.find_one({"name": instance.text, "pmail": main_mail})
         childwin = ChildScreen(name="child")
         print(ch1, "ch1")
-        childwin.ids.namel.text = instance.text + "'s vaccine chart"
+        childwin.ids.namel.text = instance.text + "'s vaccine\n chart"
         sm.add_widget(childwin)
         sm.current = "child"
 
@@ -422,9 +427,10 @@ class ParentLobby(Screen):
             btn.bind(on_release=ParentLobby.child_button_clicked)
             layout.add_widget(btn)
 
-        
+        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
+        scrollview.add_widget(layout)
 
-        self.view1.add_widget(layout)
+        self.view1.add_widget(scrollview)
 
 
 class AddChildScreen(Screen):
@@ -448,9 +454,9 @@ class AddChildScreen(Screen):
             gender = "M"
         if femalestate == "down":
             gender = "F"
-        childId = "C" + str(len(children) + 1)
+        childId = generate_unique_id(2)
         dueVaccines, overVaccines, yetVaccines = validVaccines(dateOfBirth)
-        document = {"pmail": main_mail, "cid": childId, "name": name, "dob": dateOfBirth, "gender": gender,
+        document = {"pmail": main_mail, "cid": childId, "did": "", "name": name, "dob": dateOfBirth, "gender": gender,
                     "dueVaccines": dueVaccines, "overVaccines": overVaccines, "yetVaccines": yetVaccines}
         childcol.insert_one(document)
         children_get()
@@ -461,10 +467,25 @@ class AddChildScreen(Screen):
         plob = ParentLobby(name="plobby")
         sm.add_widget(plob)
 
+
 class ChildScreen(Screen):
     view1 = ObjectProperty(None)
     view2 = ObjectProperty(None)
     view3 = ObjectProperty(None)
+
+    def doc_det(self):
+        global ch1, view_doc, sm
+
+        doc_id = ch1["did"]
+        print("doc_id", doc_id)
+        if (doc_id == ""):
+            view_doc = ViewDoctor(doc_assign=False, name="view_doc")
+        else:
+            db = rec2.find_one({"id": doc_id})
+            view_doc = ViewDoctor(doc_assign=True, data=db, name="view_doc")
+            print(db["name"])
+        sm.add_widget(view_doc)
+        sm.current = "view_doc"
 
     def save_and_back(self):
         global chbl, ch1, sm, childwin
@@ -484,8 +505,8 @@ class ChildScreen(Screen):
 
     def info_button(instance):
         vaxname = instance.text[8:]
-        vaccine = vaxcol.find_one({"name":vaxname})
-        with open(vaccine["info"],"r") as f:
+        vaccine = vaxcol.find_one({"name": vaxname})
+        with open(vaccine["info"], "r") as f:
             s = f.read()
         create_info_popup("Info", s)
 
@@ -510,10 +531,11 @@ class ChildScreen(Screen):
                              color=(1, 1, 1, 1))
                 btn1 = CheckBox()
 
-                btn2 = Button(text="Info on "+vaxname, size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                btn2 = Button(text="Info on " + vaxname, size_hint=(1, None), height=50,
+                              background_color=(0.5, 0.5, 0.5, 1),
                               color=(1, 1, 1, 1))
-                btn2.bind(on_release= ChildScreen.info_button)
-                
+                btn2.bind(on_release=ChildScreen.info_button)
+
                 chbl.append(btn1)
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
@@ -539,9 +561,10 @@ class ChildScreen(Screen):
 
                 lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
                              color=(1, 1, 1, 1))
-                btn1 = Button(text="Info on "+vaxname, size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                btn1 = Button(text="Info on " + vaxname, size_hint=(1, None), height=50,
+                              background_color=(0.5, 0.5, 0.5, 1),
                               color=(1, 1, 1, 1))
-                btn1.bind(on_release= ChildScreen.info_button)
+                btn1.bind(on_release=ChildScreen.info_button)
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
                              color=(1, 1, 1, 1))
@@ -563,9 +586,10 @@ class ChildScreen(Screen):
 
                 lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
                              color=(1, 1, 1, 1))
-                btn1 = Button(text="Info on "+vaxname, size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
+                btn1 = Button(text="Info on " + vaxname, size_hint=(1, None), height=50,
+                              background_color=(0.5, 0.5, 0.5, 1),
                               color=(1, 1, 1, 1))
-                btn1.bind(on_release= ChildScreen.info_button)
+                btn1.bind(on_release=ChildScreen.info_button)
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
                              color=(1, 1, 1, 1))
@@ -574,7 +598,6 @@ class ChildScreen(Screen):
             lay2.add_widget(lab)
 
             lay2.add_widget(btn1)
-
 
         self.view2.add_widget(lay2)
 
@@ -646,6 +669,7 @@ class DocEditProfile(Screen):
     text2 = StringProperty("")
     text3 = StringProperty("")
     text4 = StringProperty("")
+
     def __init__(self, **kwargs):
         super(DocEditProfile, self).__init__(**kwargs)
         global main_mail
@@ -672,6 +696,133 @@ class DocEditProfile(Screen):
         sm.current = "lobby"
 
 
+class ConfirmDoc(Popup):
+    text1 = StringProperty("")
+
+    def __init__(self, data, **kwargs):
+        super(ConfirmDoc, self).__init__(**kwargs)
+        self.title = "Confirm Doctor"
+        self.text1 = "Name : " + data[3] + "\n\nemail : " + data[2] +  "\n\nQualification : " + data[-2][0] + "\n\nEducation : " + data[-2][2]
+        self.data = data
+
+    def add_doc(self):
+        global conf_doc, add_pop, ch1
+        conf_doc.dismiss()
+        add_pop.dismiss()
+        req = self.data[-3]
+        db = rec1.find_one({"email": ch1["pmail"]})
+        id = db["id"]
+        gen = None
+        if(ch1['gender'] == "M"):
+            gen = 1
+        else:
+            gen = 0
+        li = [id, ch1['cid'], ch1['name'], gen, ch1["dob"]]
+        print(li)
+        print(self.data)
+
+        flag = True
+        for i in req:
+            if(i[1] == ch1['cid']):
+                flag = False
+                break
+        req.append(li)
+        if(flag):
+            print("ola")
+            rec2.update_one({"id": self.data[1]}, {"$set": {"requests": req}})
+
+class AddDocPop(Popup):
+    view7 = ObjectProperty("None")
+
+    def __init__(self, d, **kwargs):
+        super(AddDocPop, self).__init__(**kwargs)
+        self.title = "Select Doctor"
+        if (d == None):
+            self.doc = []
+        else:
+            self.doc = d
+        layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        layout.bind(minimum_height=layout.setter("height"))
+
+        for i in range(50):
+            try:
+                tex = str(i + 1) + " " + self.doc[i][3]
+                b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0.5, 0.5, 0.5, 1),
+                           color=(1, 1, 1, 1))
+                b.bind(on_press=lambda idx=i: self.press(idx, self.doc))
+            except:
+                tex = ""
+                b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0, 0, 0, 0),
+                           color=(1, 1, 1, 1))
+            layout.add_widget(b)
+        scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
+        scrollview.add_widget(layout)
+
+        self.view7.add_widget(scrollview)
+
+    def press(self, idx, doc):
+        global conf_doc
+        conf_doc = ConfirmDoc(data=doc[int(idx.text[0])-1])
+        conf_doc.open()
+
+    def search(self, search_text):
+        global add_pop
+        if (search_text == ""):
+            pass
+        else:
+            doc = get_accounts(1)
+            li = []
+            print(doc)
+            for i in doc:
+                tex = i[3].lower()
+                if search_text.lower() in tex:
+                    li.append(i)
+            print("li : ", li)
+            if (len(li) > 0):
+                add_pop.dismiss()
+                add_pop = AddDocPop(li)
+                add_pop.open()
+
+
+class ViewDoctor(Screen):
+    text1 = StringProperty("")
+    text2 = StringProperty("")
+
+    def __init__(self, doc_assign=False, data=None, **kwargs):
+        super(ViewDoctor, self).__init__(**kwargs)
+        self.doc_assign = doc_assign
+        self.doc_profile = data
+
+        if (self.doc_assign == False):
+            self.text1 = "Your are not referring to any doctor"
+            self.text2 = "Please add a doctor"
+        else:
+            self.text1 = "Doctor Profile"
+            self.text2 = "Name : " + data["name"] + "\n\nemail : " + data["email"] + "\n\nBio : " + data["details"][
+                1] + "\n\nQualification : " + data["details"][0] + "\n\nEducation : " + data["details"][2]
+
+    def remove_doc(self):
+        global ch1
+        childcol.update_one({"cid":ch1["cid"]}, {"$set": {"did": ""}})
+        pat = self.doc_profile['patient']
+        for i in pat:
+            if(i[1] == ch1["cid"]):
+                pat.remove(i)
+                break
+
+        rec2.update_one({"id": self.doc_profile["id"]}, {"$set": {"patient": pat}})
+        print(self.doc_profile)
+
+    def add_doc_pop(self):
+        global add_pop
+        add_pop = AddDocPop(d=[])
+        add_pop.open()
+
+    def back(self):
+        global view_doc
+        sm.remove_widget(view_doc)
+        sm.current = "child"
+
 
 class WindowManager(ScreenManager):
     pass
@@ -693,7 +844,7 @@ class Main(App):
         Window.size = (800, 750)
 
         try:
-            with open("logged_in", "rb") as file:
+            with open("assets/logged_in", "rb") as file:
                 x = load(file)
                 y = load(file)
             main_mail = x
