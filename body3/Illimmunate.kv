@@ -1,0 +1,488 @@
+#:kivy 2.0.0
+
+<PageOne>:
+    name: "one"
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'injection2.png'
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: "250dp"
+        spacing: "100dp"
+        Button:
+            text: "Login"
+            font_size: "25dp"
+            background_normal: ''
+            background_color: (64.0/255.0, 0.0/255.0, 128.0/255.0, 1)
+            on_release:
+                app.root.current = "login"
+                root.sign_in_up(0)
+
+        Button:
+            text: "SignUp"
+            font_size: "25dp"
+            background_normal: ''
+            background_color: (64.0/255.0, 0.0/255.0, 128.0/255.0, 1)
+            on_release:
+                app.root.current = "signup"
+                root.sign_in_up(1)
+
+<Login>:
+    name: "login"
+    BoxLayout:
+        padding: "50dp"
+        orientation: "vertical"
+
+        Label:
+            text: "Login"
+            color: 0, 0, 0, 1
+            font_size: "25dp"
+
+        BoxLayout:
+            orientation: "horizontal"
+
+            Label:
+                text: "email"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
+
+            TextInput:
+                id: email
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
+
+
+        BoxLayout:
+            orientation: "horizontal"
+
+            Label:
+                text: "Password"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
+
+            TextInput:
+                id: passwd
+                password: True
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
+
+
+
+        BoxLayout:
+            Label:
+                text: "Remember Me"
+                color: 0, 0, 0, 1
+                font_size: "17dp"
+
+            CheckBox:
+                id: logged_in
+                color: 0, 0, 0, 1
+
+#            Button:
+#                text: "Forgot Password ?"
+#                font_size: "17dp"
+#                on_press:
+#                    app.root.current = "fpasswd"
+
+
+        BoxLayout:
+            padding: "10dp"
+            spacing: "20dp"
+            orientation: "horizontal"
+
+            Button:
+                size_hint:3, 1
+                text: "Submit"
+                on_press:
+                    root.get_cred(email.text, passwd.text, logged_in.active)
+
+            Button:
+                size_hint: 1, 1
+                text: "Back"
+                on_press:
+                    app.root.current = "one"
+
+<SignUp>:
+    name: "signup"
+    BoxLayout:
+        padding: "50dp"
+        orientation: "vertical"
+
+        Label:
+            text: "Login"
+            color: 0, 0, 0, 1
+            font_size: "25dp"
+
+        BoxLayout:
+            orientation: "horizontal"
+
+            Label:
+                text: "email"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
+
+            TextInput:
+                id: email
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
+
+
+        BoxLayout:
+            orientation: "horizontal"
+
+            Label:
+                text: "Password"
+                color: 0, 0, 0, 1
+                font_size: "20dp"
+
+            TextInput:
+                id: passwd
+                password: True
+                multiline: False
+                size_hint: 1, 0.4
+                pos_hint: {"center_y": 0.5}
+
+
+        BoxLayout:
+
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "Parent"
+                    color: 0,0,0,1
+                    font_size: "25dp"
+
+                CheckBox:
+                    group: "user_type"
+                    color: 0, 0, 0, 1
+                    on_active: root.check_box_act(self, self.active, 0)
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "Doctor"
+                    color: 0,0,0,1
+                    font_size: "25dp"
+                CheckBox:
+                    group: "user_type"
+                    color: 0, 0, 0, 1
+                    on_active: root.check_box_act(self, self.active, 1)
+
+
+
+        BoxLayout:
+            Label:
+                text: "Remember Me"
+                color: 0, 0, 0, 1
+                font_size: "17dp"
+
+            CheckBox:
+                id: logged_in
+                color: 0, 0, 0, 1
+
+        BoxLayout:
+            padding: "10dp"
+            spacing: "20dp"
+            orientation: "horizontal"
+
+            Button:
+                size_hint:3, 1
+                text: "Submit"
+                on_press:
+                    root.get_cred(email.text, passwd.text, logged_in.active)
+
+            Button:
+                size_hint: 1, 1
+                text: "Back"
+                on_press:
+                    app.root.current = "one"
+
+<Lobby>:
+    name: "lobby"
+    view1: view1
+    view2: view2
+    spacing: "50dp"
+    BoxLayout:
+        spacing: "50dp"
+        padding: "30dp"
+        orientation: "horizontal"
+
+        BoxLayout:
+            size_hint: 0.4, 1
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    size_hint : 1, 0.5
+                    pos_hint: {"center_y": 0}
+                    text: "New Patient\n Request"
+                    color: 0, 0, 0, 1
+                    font_size: "25dp"
+
+                ScrollView:
+                    id : view1
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint: 1, 1
+            Label:
+                size_hint: 1, 1
+                text: "Dashboard"
+                font_size: "25"
+                color: 0, 0, 0, 1
+
+            ScrollView:
+                size_hint: 1, 3
+                id: view2
+                do_scroll_x: False
+                do_scroll_y: True
+        BoxLayout:
+            pos_hint: {"y": 0.9}
+            size_hint: 0.24, 0.1
+            Spinner:
+                color: 0, 0, 0, 1
+                id: menu
+                text: "Home"
+                values: ["Home", "Sign Out", "Edit Account"]
+                background_normal: ''
+                background_color: (255.0/255.0, 240.0/255.0, 0, 1)
+                on_text: root.menu_clicked(menu.text)
+
+<ParentLobby>:
+    name: "plobby"
+    view1: view1
+    BoxLayout:
+        orientation: "horizontal"
+        spacing: "50dp"
+        padding: "30dp"
+
+        BoxLayout:
+            orientaion: "vertical"
+
+            Button:
+                text: "Add child details"
+                on_release: root.manager.current = "addchild"
+                size_hint: 1, 0.1
+                pos_hint: {"top": 1}
+
+            ScrollView:
+                id: view1
+                do_scroll_x: False
+                do_scroll_y: True
+
+        BoxLayout:
+            pos_hint: {"y": 0.9}
+            size_hint: 0.24, 0.1
+            Spinner:
+                color: 0, 0, 0, 1
+                id: menu
+                text: "Home"
+                values: ["Home", "Sign Out", "Edit Account"]
+                background_normal: ''
+                background_color: (255.0/255.0, 240.0/255.0, 0, 1)
+                on_text: root.menu_clicked(menu.text)
+
+<AddChildScreen>:
+    BoxLayout:
+        orientation: "vertical"
+
+        GridLayout:
+            cols: 2
+
+            Label:
+                text: "Enter name"
+
+            TextInput:
+                id: namein
+
+            Label:
+                text: "Enter DOB(dd/mm/yyyy)"
+
+            TextInput:
+                id: dobin
+
+            Label:
+                text: "Enter doctor ID"
+
+            TextInput:
+                id: docin
+
+            Button:
+                text: "Done"
+                on_release: root.addChild(namein.text, dobin.text, docin.text)
+
+            Button:
+                text: "Back"
+                on_release: root.manager.current = "plobby"
+
+<ChildScreen>:
+    view1: view1
+    view2: view2
+    view3: view3
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.05
+
+            Label:
+                id: namel
+                color: 0, 0, 0, 1
+            Button:
+                text: 'Doctor details'
+
+        TabbedPanel:
+            do_default_tab: False
+
+            TabbedPanelItem:
+                text: "Vaccines \ndue now"
+
+                BoxLayout:
+
+                    ScrollView:
+                        id : view1
+                        do_scroll_x: False
+                        do_scroll_y: True
+
+            TabbedPanelItem:
+                text: "Vaccines\n taken"
+
+                ScrollView:
+                    id : view2
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+            TabbedPanelItem:
+                text: "Vaccines to be\n taken"
+
+                ScrollView:
+                    id : view3
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+        Button:
+            text: "Back"
+            on_release: root.manager.current = "plobby"
+            size_hint: 1, 0.1
+
+<ViewPatientProfile>:
+    name: "view_pat"
+    view4: view4
+    view5: view5
+    view6: view6
+    BoxLayout:
+        padding: "50dp"
+        spacing: "50dp"
+        orientation: "vertical"
+        Label:
+            text: "Patient Details"
+            color: 0, 0, 0, 1
+            font_size: "25dp"
+            size_hint: 1, 0.4
+
+        Label:
+            size_hint: 1, 1.5
+            text: root.text1
+    #        text : "hello"
+            color: 0, 0, 0, 1
+
+        TabbedPanel:
+            tab_pos: 'top_mid'
+            size_hint: 1, 6
+            do_default_tab: False
+            TabbedPanelItem:
+                background_normal: ''
+                background_color: (102.0 / 255.0, 0, 204.0/255.0, 1)
+                text: "Vaccines due\n now"
+                ScrollView:
+                    id: view4
+                    do_scroll_x: False
+                    do_scroll_y: True
+
+            TabbedPanelItem:
+                background_normal: ''
+                background_color: (102.0 / 255.0, 0, 204.0/255.0, 1)
+                text: "Vaccines \n taken"
+                ScrollView:
+                    id: view5
+                    do_scroll_x: False
+                    do_scroll_y: True
+            TabbedPanelItem:
+                background_normal: ''
+                background_color: (102.0 / 255.0, 0, 204.0/255.0, 1)
+                text: "Vaccines to\n be taken"
+                ScrollView:
+                    id: view6
+                    do_scroll_x: False
+                    do_scroll_y: True
+            TabbedPanelItem:
+                text: "Other\nInformation"
+                Label:
+                    text: "info "
+
+        Button:
+            size_hint: 1, 1
+            text: "Back"
+            on_press:
+                root.back()
+
+
+<DocEditProfile>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: "40dp"
+        spacing: "50dp"
+        Label:
+            text: "Edit Profile"
+            font_size: "25dp"
+            color: 0, 0, 0, 1
+        BoxLayout:
+            Label:
+                text: "Name"
+                color: 0, 0, 0, 1
+            TextInput:
+                id: name
+                text: root.text1
+                multiline: False
+        BoxLayout:
+            Label:
+                text: "Qualification"
+                color: 0, 0, 0, 1
+            TextInput:
+                id: qual
+                text: root.text2
+                multiline: False
+        BoxLayout:
+            size_hint: 1, 1.5
+            Label:
+                text: "Bio"
+                color: 0, 0, 0, 1
+            TextInput:
+                text: root.text3
+                id: bio
+
+        BoxLayout:
+            Label:
+                text: "Education"
+                color: 0, 0, 0, 1
+            TextInput:
+                id: edu
+                text: root.text4
+                multiline: False
+
+        BoxLayout:
+            Button:
+                text: "Submit"
+                on_press:
+                    root.press(name.text, qual.text, bio.text, edu.text)
+            Button:
+                text: "Back"
+                on_press: root.back()
