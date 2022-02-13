@@ -208,7 +208,7 @@
     view2: view2
     spacing: "50dp"
     BoxLayout:
-        spacing: "50dp"
+        spacing: "30dp"
         padding: "30dp"
         orientation: "horizontal"
 
@@ -232,11 +232,34 @@
         BoxLayout:
             orientation: "vertical"
             size_hint: 1, 1
+            spacing: "20dp"
             Label:
                 size_hint: 1, 1
                 text: "Dashboard"
                 font_size: "25"
                 color: 0, 0, 0, 1
+
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "Search Patient"
+                    color: 0, 0, 0, 1
+
+                BoxLayout:
+                    spacing: "10dp"
+                    TextInput:
+                        size_hint: 2, 1
+                        id: search
+                        multiline: False
+                        hint_text: "Enter Patient name"
+                    Button:
+                        text: "Search"
+                        on_press:
+                            root.search(0, search.text)
+                    Button:
+                        text: "Show All"
+                        on_press:
+                            root.search(1)
 
             ScrollView:
                 size_hint: 1, 3
@@ -292,44 +315,31 @@
 <AddChildScreen>:
     BoxLayout:
         orientation: "vertical"
-        padding: "40dp"
 
         GridLayout:
             cols: 2
-            spacing: "20dp"
 
             Label:
                 text: "Enter name"
-                color: 0, 0, 0, 1
 
             TextInput:
                 id: namein
 
             Label:
                 text: "Enter DOB(dd/mm/yyyy)"
-                color: 0, 0, 0, 1
 
             TextInput:
                 id: dobin
 
             Label:
-                text: "Gender"
-                color: 0, 0, 0, 1
+                text: "Enter doctor ID"
 
-            BoxLayout:
-                orientation: "horizontal"
-                ToggleButton:
-                    id: maleb
-                    text: "Male"
-                    group: "gender"
-                ToggleButton:
-                    id: femaleb
-                    text: "Female"
-                    group: "gender"
+            TextInput:
+                id: docin
 
             Button:
                 text: "Done"
-                on_release: root.addChild(namein.text, dobin.text, maleb.state, femaleb.state)
+                on_release: root.addChild(namein.text, dobin.text, docin.text)
 
             Button:
                 text: "Back"
@@ -367,25 +377,23 @@
 
             TabbedPanelItem:
                 text: "Vaccines\n taken"
-                BoxLayout:
-                    
-                    ScrollView:
-                        id : view2
-                        do_scroll_x: False
-                        do_scroll_y: True
+
+                ScrollView:
+                    id : view2
+                    do_scroll_x: False
+                    do_scroll_y: True
 
             TabbedPanelItem:
                 text: "Vaccines to be\n taken"
-                BoxLayout:
-                    
-                    ScrollView:
-                        id : view3
-                        do_scroll_x: False
-                        do_scroll_y: True
+
+                ScrollView:
+                    id : view3
+                    do_scroll_x: False
+                    do_scroll_y: True
 
         Button:
-            text: "Save changes and go back"
-            on_release: root.save_and_back()
+            text: "Back"
+            on_release: root.manager.current = "plobby"
             size_hint: 1, 0.1
 
 <ViewPatientProfile>:

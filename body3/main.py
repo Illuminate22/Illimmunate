@@ -1,3 +1,4 @@
+from kivy.uix.checkbox import CheckBox
 from kivy.uix.gridlayout import GridLayout
 from kivy.lang import Builder
 from kivy.app import App
@@ -12,7 +13,6 @@ from datetime import *
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.checkbox import CheckBox
 
 ca = certifi.where()
 
@@ -162,7 +162,7 @@ def email_process(case, email, passwd, logged_in, user_type=None):
                 sm.add_widget(plob)
                 sm.current = "plobby"
             elif main_user_type == 1:
-                lob = Lobby(name="lobby")
+                lob = Lobby(r=None, p=None, name="lobby")
                 sm.add_widget(lob)
                 sm.current = "lobby"
 
@@ -202,7 +202,7 @@ def email_process(case, email, passwd, logged_in, user_type=None):
                 sm.add_widget(plob)
                 sm.current = "plobby"
             else:
-                lob = Lobby(name="lobby")
+                lob = Lobby(r=None, p=None, name="lobby")
                 sm.add_widget(lob)
                 sm.current = "lobby"
 
@@ -276,13 +276,20 @@ class Lobby(Screen):
             sm.add_widget(edit_win)
             sm.current = "deditprof"
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        global main_mail
+    def get_data(self, mail):
         dic = rec2.find_one({"email": main_mail})
         req = dic["requests"]
 
         patient = dic["patient"]
+        return req, patient
+
+    def __init__(self,r, p, **kwargs):
+        super().__init__(**kwargs)
+        global main_mail
+        if(r == None and p == None):
+            self.req, self.patient = self.get_data(main_mail)
+        else:
+            self.req, self.patient = r, p
 
         layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         layout.bind(minimum_height=layout.setter("height"))
@@ -290,7 +297,7 @@ class Lobby(Screen):
         for i in range(20):
 
             try:
-                tex = str(i + 1) + " " + req[i][2]
+                tex = str(i + 1) + " " + self.req[i][2]
                 b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0.5, 0.5, 0.5, 1),
                            color=(1, 1, 1, 1))
                 b.bind(on_press=lambda idx=i: self.press(0, idx))
@@ -311,10 +318,10 @@ class Lobby(Screen):
         for i in range(50):
 
             try:
-                tex = str(i + 1) + " " + patient[i][2]
+                tex = str(i + 1) + " " + self.patient[i][2]
                 b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0.5, 0.5, 0.5, 1),
                            color=(1, 1, 1, 1))
-                b.bind(on_press=lambda idx=i: self.press(1, idx))
+                b.bind(on_press=lambda idx=i: self.press(1, idx, self.req, self.patient))
             except:
                 tex = ""
                 b = Button(text=tex, size=(50, 50), size_hint=(1, None), background_color=(0, 0, 0, 0),
@@ -325,29 +332,55 @@ class Lobby(Screen):
 
         self.view2.add_widget(scrollview2)
 
-    def press(self, case, but):
+    def press(self, case, but, req, pat):
         global main_mail, sm, lob, view_pat
-        dic = rec2.find_one({"email": main_mail})
-        req = dic["requests"]
-        patient = dic["patient"]
+        # dic = rec2.find_one({"email": main_mail})
+        # req = dic["requests"]
+        # patient = dic["patient"]
         if (case == 0):
             print("New request")
             print("Button Pressed : ", but.text)
             li = req[int(but.text[0]) - 1]
             req.pop(int(but.text[0]) - 1)
-            patient.append(li)
-            rec2.update_one({"email": main_mail}, {"$set": {"patient": patient, "requests": req}})
+            pat.append(li)
+            rec2.update_one({"email": main_mail}, {"$set": {"patient": pat, "requests": req}})
             sm.remove_widget(lob)
-            lob = Lobby(name="lobby")
+            lob = Lobby(r=None, p=None, name="lobby")
             sm.add_widget(lob)
             sm.current = "lobby"
         else:
             print("View Patient")
             print("Button Pressed : ", but.text)
-            view_pat = ViewPatientProfile(pat_dat=patient[int(but.text[0]) - 1], name="view_pat")
+            view_pat = ViewPatientProfile(pat_dat=pat[int(but.text[0]) - 1], name="view_pat")
             sm.add_widget(view_pat)
             sm.current = "view_pat"
 
+    def search(self, case, search_name = None):
+        global lob, main_mail
+        if(case == 0):
+            count = 0
+
+            req, pat = self.get_data(main_mail)
+            temp = self.patient.copy()
+            for i in range(len(pat)):
+                if(search_name not in pat[i-count][2]):
+                    pat.pop(i-count)
+                    count += 1
+            sm.remove_widget(lob)
+
+            if(len(temp) > len(self.patient)):
+                lob = Lobby(r=req, p=temp, name="lobby")
+            else:
+                lob = Lobby(r=self.req, p=pat, name="lobby")
+
+            sm.add_widget(lob)
+            sm.current = "lobby"
+        else:
+            sm.remove_widget(lob)
+            req, pat = self.get_data(main_mail)
+            lob = Lobby(r=req, p=pat, name="lobby")
+            sm.add_widget(lob)
+            sm.current = "lobby"
 
 class ParentLobby(Screen):
     view1 = ObjectProperty(None)
@@ -362,7 +395,7 @@ class ParentLobby(Screen):
             sm.remove_widget(plob)
 
     def child_button_clicked(instance):
-        global sm, ch1, childwin
+        global sm, ch1
         ch1 = childcol.find_one({"name": instance.text, "pmail": main_mail})
         childwin = ChildScreen(name="child")
         print(ch1, "ch1")
@@ -422,7 +455,6 @@ class AddChildScreen(Screen):
         plob = ParentLobby(name="plobby")
         sm.add_widget(plob)
 
-
 class ChildScreen(Screen):
     view1 = ObjectProperty(None)
     view2 = ObjectProperty(None)
@@ -431,15 +463,15 @@ class ChildScreen(Screen):
     def save_and_back(self):
         global chbl, ch1, sm, childwin
         actl = []
-        for i in range(len(chbl)-1, -1, -1):
+        for i in range(len(chbl) - 1, -1, -1):
             if chbl[i].active:
                 actl.append(i)
         dueVaccines = ch1["dueVaccines"]
         overVaccines = ch1["overVaccines"]
         for j in actl:
             overVaccines.append(dueVaccines.pop(j))
-        #print(dueVaccines, overVaccines)
-        childcol.update_one({"cid": ch1["cid"]}, {"$set":{"dueVaccines": dueVaccines, "overVaccines": overVaccines}})
+        # print(dueVaccines, overVaccines)
+        childcol.update_one({"cid": ch1["cid"]}, {"$set": {"dueVaccines": dueVaccines, "overVaccines": overVaccines}})
         ch1 = childcol.find_one({"cid": ch1["cid"]})
         sm.current = "plobby"
         sm.remove_widget(childwin)
@@ -462,24 +494,23 @@ class ChildScreen(Screen):
                 vaxname = vaxcol.find_one({"vid": vaccine})["name"]
 
                 lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
-                            color=(1, 1, 1, 1))
+                             color=(1, 1, 1, 1))
                 btn1 = CheckBox()
 
                 btn2 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                            color=(1, 1, 1, 1))
+                              color=(1, 1, 1, 1))
                 chbl.append(btn1)
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
-                               color=(1, 1, 1, 1))
+                             color=(1, 1, 1, 1))
                 btn1 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
-                               color=(1, 1, 1, 1))
+                              color=(1, 1, 1, 1))
 
                 btn2 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
-                               color=(1, 1, 1, 1))
+                              color=(1, 1, 1, 1))
             lay1.add_widget(lab)
             lay1.add_widget(btn1)
             lay1.add_widget(btn2)
-            
 
         self.view1.add_widget(lay1)
 
@@ -492,14 +523,14 @@ class ChildScreen(Screen):
                 vaxname = vaxcol.find_one({"vid": vaccine})["name"]
 
                 lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
-                            color=(1, 1, 1, 1))
+                             color=(1, 1, 1, 1))
                 btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                            color=(1, 1, 1, 1))
+                              color=(1, 1, 1, 1))
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
-                               color=(1, 1, 1, 1))
+                             color=(1, 1, 1, 1))
                 btn1 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
-                               color=(1, 1, 1, 1))
+                              color=(1, 1, 1, 1))
             lay3.add_widget(lab)
 
             lay3.add_widget(btn1)
@@ -515,14 +546,14 @@ class ChildScreen(Screen):
                 vaxname = vaxcol.find_one({"vid": vaccine})["name"]
 
                 lab = Button(text=vaxname, size_hint=(1, None), height=50, background_color=(0, 0, 0, 1),
-                            color=(1, 1, 1, 1))
+                             color=(1, 1, 1, 1))
                 btn1 = Button(text="Info", size_hint=(1, None), height=50, background_color=(0.5, 0.5, 0.5, 1),
-                            color=(1, 1, 1, 1))
+                              color=(1, 1, 1, 1))
             except:
                 lab = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
-                               color=(1, 1, 1, 1))
+                             color=(1, 1, 1, 1))
                 btn1 = Button(text="", size_hint=(1, None), height=50, background_color=(0, 0, 0, 0),
-                               color=(1, 1, 1, 1))
+                              color=(1, 1, 1, 1))
             lay2.add_widget(lab)
 
             lay2.add_widget(btn1)
@@ -530,8 +561,6 @@ class ChildScreen(Screen):
         scrollview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
         scrollview.add_widget(lay2)
         self.view2.add_widget(scrollview)
-
-    
 
 
 # class ForgotPswd(Screen):
@@ -614,14 +643,14 @@ class DocEditProfile(Screen):
     def press(self, name, qual, bio, edu):
         global lob, main_mail, edit_win
         rec2.update_one({"email": main_mail}, {"$set": {"name": name, "details": [qual, bio, edu]}})
-        lob = Lobby(name="lobby")
+        lob = Lobby(r=None, p=None, name="lobby")
         sm.add_widget(lob)
         sm.remove_widget(edit_win)
         sm.current = "lobby"
 
     def back(self):
         global lob, edit_win
-        lob = Lobby(name="lobby")
+        lob = Lobby(r=None, p=None, name="lobby")
         sm.add_widget(lob)
         sm.remove_widget(edit_win)
         sm.current = "lobby"
@@ -658,7 +687,7 @@ class Main(App):
                 sm.add_widget(plob)
                 sm.current = "plobby"
             else:
-                lob = Lobby(name="lobby")
+                lob = Lobby(r=None, p=None, name="lobby")
                 sm.add_widget(lob)
                 main_user_type = 1
                 sm.current = "lobby"
